@@ -1,0 +1,47 @@
+broadcastVar=sc.broadcast([1,2,3])
+print broadcastVar.value
+# The value is available on the driver
+print "Driver:", broadcastVar.value
+# And on the executors
+mapFunction=lambda n: "Task " + str(n) + ": " + str(broadcastVar.value)
+results=sc.parallelize(range(10), numSlices=10).map(mapFunction).collect()
+print "\n".join(results)
+
+size=2*1000*1000
+dataSet=list(xrange(size))
+
+dataSet
+
+len(dataSet)
+import sys
+print sys.getsizeof(dataSet) / 1000 / 1000, "Megabytes"
+
+rdd=sc.parallelize([1,2,3,4,5], numSlices=5)
+
+rdd.collect()
+print rdd.getNumPartitions(), "partitions"
+for i in range(5):
+  rdd.map(lambda x: len(dataSet) * x).collect()
+
+broadcastVar=sc.broadcast(dataSet)
+
+for i in range(5):
+  rdd.map(lambda x: len(broadcastVar.value)).collect()
+
+
+df1 = sqlContext.range(100)
+df2 = sqlContext.range(100)
+
+df1.join(df2, df1["id"] == df2["id"]).collect()
+
+from pyspark.sql.functions import broadcast
+
+df1.join(broadcast(df2), df1["id"] == df2["id"]).collect()
+
+df2.cache().count()
+df1.join(df2, df1["id"] == df2["id"]).collect()
+
+
+
+
+
