@@ -1,0 +1,39 @@
+iris_df = spark.read.csv('mnt/learningspark/iris.data.txt',inferSchema = True)
+
+oldColumns = iris_df.schema.names
+newColumns = ['sepal_length_in_cm', 'sepal_width_in_cm', 'petal_length_in_cm',
+       'petal_width_in_cm', 'class']
+
+df = reduce(lambda iris_df, idx: iris_df.withColumnRenamed(oldColumns[idx], newColumns[idx]), xrange(len(oldColumns)), iris_df)
+
+features = df.drop('class')
+
+from pyspark.ml.feature import VectorAssembler
+
+vecAssembler = VectorAssembler(inputCols=features.columns, outputCol="features")
+VectorAssembler_data = vecAssembler.transform(df)
+from pyspark.ml.feature import StringIndexer
+
+indexer = StringIndexer(inputCol="class", outputCol="label")
+
+final_df = indexer.fit(VectorAssembler_data).transform(VectorAssembler_data)
+
+from pyspark.ml.clustering import KMeans
+
+kmeans = KMeans().setK(3).setSeed(1)
+model = kmeans.fit(final_df)
+
+wssse = model.computeCost(final_df)
+print("Within Set Sum of Squared Errors = " + str(wssse))
+
+centers = model.clusterCenters()
+print("Cluster Centers: ")
+for center in centers:
+    print(center)
+
+
+
+
+
+
+
