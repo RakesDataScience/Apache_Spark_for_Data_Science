@@ -1,0 +1,145 @@
+rdd = sc.textFile("/mnt/learningspark/people.txt")
+
+
+
+
+rdd.collect()
+
+
+
+for line in rdd.take(10):
+  print line
+
+
+
+from datetime import datetime
+from collections import namedtuple
+
+Person = namedtuple('Person', ['first_name', 'middle_name', 'last_name', 'gender', 'birth_date', 'salary', 'ssn'])
+
+def map_to_person(line):
+  cols = line.split(":")
+  return Person(first_name  = cols[0],
+                middle_name = cols[1],
+                last_name   = cols[2],
+                gender      = cols[3],
+                birth_date  = datetime.strptime(cols[4], "%Y-%m-%d"),
+                salary      = int(cols[5]),
+                ssn         = cols[6])
+    
+people_rdd = rdd.map(map_to_person)
+df = people_rdd.toDF()
+
+
+
+
+df.count()
+
+
+
+sampledDF = df.sample(withReplacement = False, fraction = 0.02, seed = 1887348908234L)
+
+
+
+
+sampledDF.count()
+
+
+
+df.registerTempTable("people")
+
+
+
+
+df.printSchema()
+
+
+
+
+df.show() # show the first 20 rows of the DataFrame
+
+
+
+
+df.select(df["first_name"], df["last_name"], df["gender"])
+
+
+
+
+df.select(df["first_name"], df["last_name"], df["gender"]).show(10)
+
+
+
+
+df.filter(df["gender"] == "M")
+
+
+
+
+df2 = df.filter(df["gender"] == "M").filter(df["salary"] > 100000).select(df["first_name"], df["last_name"], df["salary"])
+
+
+
+
+df.filter(df["birth_date"] >= "1970-01-01").filter(df["birth_date"] <= "1979-12-31").orderBy(df.birth_date, df.salary).show()
+
+
+
+
+salary_groupBy = df.groupBy(df["salary"])
+
+
+
+salary_groupBy
+
+
+
+x = df.groupBy(df["salary"]).count()
+
+
+
+x.show()
+
+
+
+x.filter(x['count'] > 1).select("salary", x["count"].alias("total")).show()
+
+
+
+raw_df1 = spark.read.text("/mnt/learningspark/tweets.json")
+
+
+
+
+raw_df1.show(5,False)
+
+
+
+from pyspark.sql.functions import explode,split
+
+
+
+raw_df = raw_df1.where("value like '%@%'")
+
+
+
+df = raw_df.select(explode(split("value"," "))) 
+df.show()
+
+
+
+df1 = df.where("col like '@%'").toDF("word")
+
+
+
+df1.show()
+
+
+
+df1.groupBy("word").count().sort(
+   "count",ascending=False).show(5)
+
+
+
+
+
