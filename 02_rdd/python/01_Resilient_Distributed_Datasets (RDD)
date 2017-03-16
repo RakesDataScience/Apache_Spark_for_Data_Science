@@ -1,0 +1,139 @@
+type(sc)
+spark
+
+rdd = sc.parallelize([1,2,3,4])
+rdd.first()
+mutl_rdd = rdd.map(lambda(x) : x*x)
+mutl_rdd.collect()
+sum_of_rdd = rdd.map(lambda(x) : x * x).reduce(lambda a,b: a+b)
+
+Filter
+
+rdd_a = sc.parallelize([1,2,3,4,5,6])
+filter_rdd = rdd_a.filter(lambda x: x % 3 == 0)
+filter_rdd.collect()
+
+
+Distinct
+rdd_c = sc.parallelize(["John", "Jack", "Mike", "Jack"])
+dist_rdd = rdd_c.distinct()
+dist_rdd.collect()
+
+
+Intersection
+
+rdd_x = sc.parallelize([1,2,3,4,5,6,7,8,9,10])
+rdd_x = sc.parallelize([5,6,7,8,9,10,11,12,13,14,15])
+rdd_z = rdd_x.intersection(rdd_x)
+rdd_z.collect()
+
+
+Union
+
+rdd_a = sc.parallelize([3,4,5,6,7])
+rdd_b = sc.parallelize([7,8,9])
+rdd_c = rdd_a.union(rdd_b)
+rdd_c.collect()
+
+
+Map
+
+rdd_a = sc.parallelize(["animal", "human", "bird", "rat"], 3)
+rdd_b = rdd_a.map(lambda x: len(x))
+rdd_c = rdd_a.zip(rdd_b)
+rdd_c.collect()
+
+dd my my map code here 
+
+add my code
+
+l = range(2, 10)
+l_rdd = sc.parallelize(l)
+l_rdd.collect()
+
+map & flatMap difference
+
+rdd_a = sc.parallelize([1,2,3,4,5])
+map_rdd = a.map(lambda x: range(1,x+1))
+
+map_rdd.collect()
+flat_map = rdd_a.flatMap(lambda x: range(1,x+1))
+flat_map.collect()
+sc.parallelize([5, 10, 20]).map(lambda x:[x, x, x]).collect()
+sc.parallelize([5, 10, 20]).flatMap(lambda x:[x, x, x]).collect()
+
+keys
+
+rdd_a = sc.parallelize(["black", "blue", "white", "green", "grey"])
+rdd_b = rdd_a.map(lambda x:(len(x), x))
+rdd_b.collect()
+
+rdd_b.collect()
+
+keys_rdd = rdd_b.keys()
+
+keys_rdd.collect()
+
+Cartesian
+
+rdd_x = sc.parallelize([1,2,3])
+rdd_y = sc.parallelize([10,11,12])
+rdd_x.cartesian(rdd_y).collect()
+
+
+GroupByKey
+
+rdd_a = sc.parallelize(["black", "blue", "white", "green", "grey"])
+rdd_b = rdd_a.groupBy(lambda x: len(x))
+groupBy_result = rdd_b.collect()
+sorted([(x,sorted(y)) for (x,y) in groupBy_result])
+
+rdd_a = sc.parallelize(["blue", "green", "orange"])
+rdd_b = rdd_a.keyBy(lambda x: len(x))
+rdd_b.collect()
+
+rdd_c = sc.parallelize(["black", "white", "grey"])
+rdd_d = rdd_c.keyBy(lambda x: len(x))
+rdd_d.collect()
+
+Join
+
+join_rdd = rdd_b.join(rdd_d)
+join_rdd.collect()
+rdd_b.leftOuterJoin(rdd_d).collect()
+rdd_b.rightOuterJoin(rdd_d).collect()
+rdd_b.fullOuterJoin(rdd_d).collect()
+
+Reduce by key
+
+rdd_a = sc.parallelize(["black", "blue", "white", "green", "grey"], 2)
+rdd_b = rdd_a.map(lambda x: (len(x), x))
+rdd_b.collect()
+reduce_by_key_result = rdd_b.reduceByKey(lambda x,y: x + y)
+reduce_by_key_result.collect()
+
+rdd_a = sc.parallelize(["black", "blue", "white", "orange"])
+rdd_b = rdd_a.map(lambda x: (len(x), x))
+rdd_b.collect()
+rdd_b.reduceByKey(lambda x,y: x + y).collect()
+
+rdd = sc.parallelize([1, 2, 3, 4], 2)
+rdd.getNumPartitions()
+rdd = sc.parallelize([1, 2, 3, 3])
+
+def mult_method(x): 
+	return x*x
+
+mult_rdd = rdd.map(mult_method).collect()
+mult_rdd
+
+Actions
+
+sc.parallelize([2, 3, 4]).count()
+sc.parallelize([2, 3, 4]).collect()
+sc.parallelize([2, 3, 4]).first()
+sc.parallelize([2, 3, 4]).take(2)
+
+
+
+
