@@ -1,0 +1,45 @@
+wordList = ["doug", "jon", "sameer", "eliano", "richard"]
+
+wordsRDD = sc.parallelize(wordList, 4)
+
+wordsRDD.collect()
+
+datapath = "mnt/learningspark/tom_sawyer.txt"
+
+sc.textFile(datapath, 2).collect()
+
+ebook = sc.textFile(datapath, 2).collect()
+
+# Why doesn’t this work?
+ebook.count()
+
+ebookRDD = sc.textFile(datapath, 2)
+
+ebookRDD.count()
+
+ebookRDD.getNumPartitions()
+
+print 'type of ebookRDD: {0}'.format(type(ebookRDD))
+
+
+glomDemo = sc.parallelize([1,2,3,4,5,6,7,8,9], 3)
+glomDemo.glom().collect()
+
+for (p, i) in glomDemo.glom().zipWithIndex().collect():
+  print '%d: %s items(s)' % (i, p)
+
+for (p, i) in ebookRDD.glom().zipWithIndex().collect():
+  print '%d: %d items(s)' % (i, len(p))
+
+sc.textFile(datapath, 2).flatMap(lambda x: x.split(' ')).collect()
+
+
+sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).collect()
+
+
+sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).reduceByKey(lambda x, y: x + y).collect()
+
+
+
+
+
