@@ -1,0 +1,164 @@
+
+val colors = List("white","green","yellow","red","brown","pink")
+val color_df = sc.parallelize(colors).map(x => (x,x.length)).toDF("color","length")
+color_df
+color_df.dtypes
+color_df.show()
+color_df.columns
+color_df.drop("length").show()
+
+color_df.filter(color_df("length").between(4,5)).select(color_df("color").alias("mid_length")).show()
+
+color_df.filter(color_df("length") > 4).filter(color_df("color")!== "white").show()
+
+color_df.sort("color").show()
+color_df.filter(color_df("length")>=4).sort($"length", $"color".desc).show()
+
+color_df.orderBy("length","color").take(4)
+color_df.groupBy("length").count().show()
+
+val df = spark.read.json("/mnt/learningspark/authors.json")
+df.show()
+val df1 = sqlContext.read.json("/mnt/learningspark/authors_missing.json")
+df1.show()
+val df2 = df1.na.drop()
+df2.show()
+
+
+
+Dataset API()
+val ds1 = List.range(1,5).toDS()
+ds1.collect()
+val colors = List("red","orange","blue","green","yellow")
+val color_ds = sc.parallelize(colors).map(x => (x,x.length)).toDS()
+color_ds.show()
+
+case class Color(var color: String, var len: Int)
+
+val color_ds = sc.parallelize(colors).map(x => Color(x,x.length)).toDS()
+color_ds.dtypes
+color_ds.schema
+color_ds.explain()
+val color_df = color_ds.toDF()
+color_df
+color_df.show()
+val color_df = sc.parallelize(colors).map(x => (x,x.length)).toDF("color","len")
+val ds_from_df = color_df.as[Color]
+ds_from_df.explain
+case class Auth(first_name: String, last_name: String,books: Array[String])
+val auth = spark.read.json("/mnt/learningspark/authors.json").as[Auth]
+auth.show()
+
+import org.apache.spark.sql.functions._
+auth.select(explode($"books") as "book",$"first_name",$"last_name").show(2,false)
+
+val monthlySales = spark.read.options(Map({"header"->"true"},{"inferSchema" -> "true"})).csv("/mnt/learningspark/MonthlySales.csv")
+
+monthlySales.show()
+
+val employees = sc.parallelize(List((1, "John", 25), (2, "Ray", 35), (3, "Mike", 24), (4, "Jane", 28), (5, "Kevin", 26), (6, "Vincent", 35), (7, "James", 38), (8, "Shane", 32), (9, "Larry", 29), (10, "Kimberly", 29), (11, "Alex", 28), (12, "Garry", 25), (13, "Max", 31))).toDF("emp_id","name","age")
+employees.show()
+
+val salary = spark.read.json("/mnt/learningspark/salary.json")
+salary.show()
+val designation = spark.read.json("/mnt/learningspark/designation.json")
+designation.show()
+val final_data = employees.join(salary, $"emp_id" === $"e_id").join(designation, $"emp_id" === $"id").select("emp_id", "name", "age", "role", "salary")
+final_data.show()
+
+var clean_data = final_data.na.drop()
+clean_data.show()
+
+final_data.dtypes
+final_data.show()
+
+val mean_salary = final_data.select(avg("salary")).first()(0).toString.toDouble
+
+mean_salary
+clean_data = final_data.na.fill(Map("salary" -> mean_salary)) 
+clean_data.show()
+
+Another example for missing value treatment
+case class Author (FirstName: String, LastName: String, Dob: String)
+
+val authors = Seq(
+        Author("Thomas","Hardy","June 2, 1840"),
+        Author("Charles","Dickens","7 February 1812"),
+        Author("Mark","Twain",null),
+        Author("Emily",null,null))
+
+val ds1 = sc.parallelize(authors).toDS()
+ds1.show()
+
+Drop rows with missing values
+ds1.na.drop().show()
+
+
+
+//Drop rows with at least 2 missing values
+//Note that there is no direct scala function to drop rows with at least n missing values
+//However, you can drop rows containing under specified non nulls
+//Use that function to achieve the same result
+
+ds1.na.drop(minNonNulls = 2).show()
+
+ds1.na.fill("Unknown").show()
+
+ds1.na.fill(Map("LastName"->"--", "Dob"->"Unknown")).show()
+
+
+
+//Duplicate values treatment
+val authors = Seq(
+            Author("Thomas","Hardy","June 2,1840"),
+            Author("Thomas","Hardy","June 2,1840"),
+            Author("Thomas","H",null),
+            Author("Jane","Austen","16 December 1775"),
+            Author("Emily",null,null))
+
+val ds1 = sc.parallelize(authors).toDS()
+
+ds1.show()
+ds1.dropDuplicates().show()
+ds1.dropDuplicates("FirstName").show()
+val concatfunc = udf((name: String, age: Integer) => 
+                           {name + "_" + age})
+val concat_df = final_data.withColumn("name_age",
+                         concatfunc($"name", $"age"))
+
+concat_df.show()
+
+
+
+// Adding constant to data
+val addconst = udf((age: Integer) => {age + 10})
+
+val data_new = concat_df.withColumn("age_incremented",addconst(col("age")))
+data_new.show()
+// Replace values in a column
+//Note: As of Spark 2.0.0, there is no replace on DataFrame/ Dataset does not work so .na. is a work around
+ds1.na.replace("FirstName",Map("Emily" -> "Charlotte")).show()
+ds1.withColumn("Initial",ds1("LastName").substr(1,1)).show()
+
+
+
+
+//Date conversions
+//Create udf for date conversion that converts incoming string to YYYY-MM-DD format
+// The function assumes month is full month name and year is always 4 digits
+// Separator is always a space or comma
+// Month, date and year may come in any order
+
+//Reusing authors case class and data
+val authors = Seq(
+        Author("Thomas","Hardy","June 2, 1840"),
+        Author("Charles","Dickens","7 February 1812"),
+        Author("Mark","Twain",null),
+        Author("Jane","Austen","16 December 1775"),
+        Author("Emily",null,null))
+val ds1 = sc.parallelize(authors).toDS()
+ds1.show()
+
+
+
+
