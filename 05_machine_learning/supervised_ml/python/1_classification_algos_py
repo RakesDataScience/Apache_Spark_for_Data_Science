@@ -1,0 +1,308 @@
+from pyspark.ml import Pipeline
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.feature import HashingTF, Tokenizer
+
+
+
+raw_data = spark.read.csv('mnt/learningspark/SMSSpamCollection',sep='\t')
+
+
+
+raw_data.show()
+
+
+
+from pyspark.sql.functions import *
+
+raw_data = raw_data.select(col("_c0").alias("label"), col("_c1").alias("text"))
+
+
+
+
+raw_data.show()
+
+
+
+from pyspark.ml.feature import Tokenizer
+
+
+
+tokenizer = Tokenizer(inputCol="text", outputCol="words")
+wordsDataFrame = tokenizer.transform(raw_data)
+
+
+
+wordsDataFrame.show()
+
+
+
+from pyspark.ml.feature import StopWordsRemover
+
+
+
+
+remover = StopWordsRemover(inputCol="words", outputCol="filtered_words")
+
+
+
+
+filtered_words = remover.transform(wordsDataFrame)
+
+
+
+filtered_words.show()
+
+
+
+from pyspark.ml.feature import StringIndexer
+
+
+
+
+indexer = StringIndexer(inputCol="label", outputCol="labelIndex")
+indexed_df = indexer.fit(filtered_words).transform(filtered_words)
+
+
+
+
+indexed_df.show()
+
+
+
+from pyspark.ml.feature import HashingTF, IDF
+
+
+
+
+hashingTF = HashingTF(inputCol="filtered_words", outputCol="rawFeatures", numFeatures=10000)
+featurizedData = hashingTF.transform(indexed_df)
+
+
+
+featurizedData.show()
+
+
+
+idf = IDF(inputCol="rawFeatures", outputCol="features")
+idfModel = idf.fit(featurizedData)
+
+
+
+idfModel
+
+
+
+rescaledData = idfModel.transform(featurizedData)
+
+
+
+
+rescaledData.show()
+
+
+
+train, test = rescaledData.randomSplit([0.8, 0.2],seed =11L)
+
+
+
+
+from pyspark.ml.linalg import Vectors
+from pyspark.ml.classification import LogisticRegression
+
+
+
+
+lr = LogisticRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8,labelCol="labelIndex", featuresCol="features")
+
+
+
+
+lrModel = lr.fit(train)
+
+
+
+
+predictions = lrModel.transform(test)
+
+
+
+
+predictions.select("prediction", "labelIndex", "features").show(5)
+
+
+
+
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+
+
+
+
+evaluator = MulticlassClassificationEvaluator(
+    labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
+accuracy = evaluator.evaluate(predictions)
+print("Test Error = %g " % (1.0 - accuracy))
+
+
+
+
+accuracy
+
+
+
+# MAGIC %md Pipeline
+
+
+
+from pyspark.ml.feature import Tokenizer
+from pyspark.ml.feature import StopWordsRemover
+from pyspark.ml.feature import StringIndexer
+from pyspark.ml.feature import HashingTF, IDF
+
+(trainingData, testData) = raw_data.randomSplit([0.8, 0.2],seed = 11L)
+
+tokenizer = Tokenizer(inputCol="text", outputCol="words")
+remover = StopWordsRemover(inputCol="words", outputCol="filtered_words")
+indexer = StringIndexer(inputCol="label", outputCol="labelIndex")
+
+hashingTF = HashingTF(inputCol="filtered_words", outputCol="rawFeatures", numFeatures=10000)
+idf = IDF(inputCol="rawFeatures", outputCol="features")
+from pyspark.ml.classification import LogisticRegression
+lr = LogisticRegression(maxIter=10, regParam=0.3, elasticNetParam=0.8,labelCol="labelIndex", featuresCol="features")
+
+
+
+
+from pyspark.ml import Pipeline
+pipeline_lg = Pipeline(stages=[tokenizer, remover,indexer, hashingTF, idf, lr])
+pipeline_lg_model = pipeline_lg.fit(trainingData)
+
+
+
+
+
+predictions_lg = pipeline_lg_model.transform(testData)
+
+
+
+evaluator = MulticlassClassificationEvaluator(
+    labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
+accuracy_lg = evaluator.evaluate(predictions_lg)
+print("Accuracy_lg  = %g "%(accuracy_lg))
+print("Test Error = %g " % (1.0 - accuracy_lg))
+
+
+
+# MAGIC %md DecisionTreeClassifier
+
+
+
+from pyspark.ml.classification import DecisionTreeClassifier
+dt = DecisionTreeClassifier(labelCol="labelIndex", featuresCol="features")
+
+pipeline_dt = Pipeline(stages=[tokenizer, remover,indexer, hashingTF, idf, dt])
+pipeline_dt_model = pipeline_dt.fit(trainingData)
+predictions_dt = pipeline_dt_model.transform(testData)
+
+
+
+
+accuracy_dt = evaluator.evaluate(predictions_dt )
+print("Dccuracy_dt  = %g "%(accuracy_dt))
+print("Test Error = %g " % (1.0 - accuracy_dt))
+
+
+
+
+# MAGIC %md RandomForestClassifier
+
+
+
+from pyspark.ml.classification import RandomForestClassifier
+
+rf = RandomForestClassifier(labelCol="labelIndex", featuresCol="features")
+
+
+pipeline_rf = Pipeline(stages=[tokenizer, remover,indexer, hashingTF, idf, rf])
+pipeline_rf_model = pipeline_rf.fit(trainingData)
+predictions_rf = pipeline_rf_model.transform(testData)
+
+
+
+
+
+
+evaluator_rf = MulticlassClassificationEvaluator(
+    labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
+predictions_rf = evaluator_rf.evaluate(predictions_rf)
+
+
+
+print("Accuracy_rf  = %g "%(predictions_rf))
+print("Test Error = %g " % (1.0 - predictions_rf))
+
+
+
+
+# MAGIC %md Gradient-boosted tree classifier
+
+
+
+from pyspark.ml.classification import GBTClassifier
+gbt = GBTClassifier(labelCol="labelIndex", featuresCol="features",maxIter=10)
+
+
+
+
+pipeline_gbt = Pipeline(stages=[tokenizer, remover,indexer, hashingTF, idf, gbt])
+pipeline_gbt_model = pipeline_gbt.fit(trainingData)
+predictions_gbt = pipeline_gbt_model.transform(testData)
+
+
+
+
+evaluator_gbt = MulticlassClassificationEvaluator(
+    labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
+
+
+
+
+
+accuracy_gbt = evaluator_gbt.evaluate(predictions_gbt)
+print("Accuracy_rf  = %g "%(accuracy_gbt))
+print("Test Error = %g " % (1.0 - accuracy_gbt))
+
+
+
+# MAGIC %md NaiveBayes
+
+
+
+from pyspark.ml.classification import NaiveBayes
+nb = NaiveBayes(labelCol="labelIndex", featuresCol="features")
+
+
+
+
+pipeline_nb = Pipeline(stages=[tokenizer, remover,indexer, hashingTF, idf, nb])
+pipeline_nb_model = pipeline_nb.fit(trainingData)
+predictions_nb = pipeline_nb_model.transform(testData)
+
+
+
+
+
+evaluator_nb = MulticlassClassificationEvaluator(
+    labelCol="labelIndex", predictionCol="prediction", metricName="accuracy")
+
+
+
+
+
+accuracy_nb = evaluator_nb.evaluate(predictions_nb)
+print("Accuracy_rf  = %g "%(accuracy_nb))
+print("Test Error = %g " % (1.0 - accuracy_nb))
+
+
+
+
+
