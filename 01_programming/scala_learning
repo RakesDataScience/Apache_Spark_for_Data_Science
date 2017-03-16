@@ -1,0 +1,123 @@
+println("Hello World!")
+
+var i = 4
+i.getClass
+
+var f = 4.1
+f.getClass
+
+var b = true
+var s = "This is a string!"
+println(s)
+val my_list =List()
+var my_list = List(1, 2, 3)
+println(my_list)
+
+for(i <- my_list){
+       println(i);
+      }
+
+
+var my_list = List(1, "Hello", 3.4)
+println(my_list)
+
+var my_list = ("mouse", List(8, 4, 6), List('a'))
+println(my_list)
+
+var my_list = List('p','r','o','b','e')
+println(my_list)
+println(my_list(0))
+println(my_list(2))
+
+set
+var a = Set()
+var my_set = Set(1, 2, 3)
+println(my_set)
+
+for s <-  my_set{
+    println(s)
+}
+
+
+for(s <- my_set){
+       println(s);
+      }
+
+var my_set = Set(1.0, "Hello", (1, 2, 3))
+println(my_set)
+
+my_set = Set(1,2,3,4,3,2)
+println(my_set)
+
+map
+var my_map = Map()
+var my_map = Map(1 -> "apple", 2->"ball")
+for ((k,v) <- my_map) printf("key= %s, value= %s\n", k, v)
+var my_map = Map("name"-> "John", 1 ->List(2, 4, 3))
+println(my_dict)
+
+var num = 3
+if( num >0  ){
+         println(num,"is a positive number.");}
+
+var num = -1
+if (num > 0){
+    println(num, "is a positive number.")}
+
+var num = -5
+//var num = 0
+if num >= 0{
+    println("Positive or Zero")
+else:
+    print("Negative number")
+
+var num = 0
+//var num = -5
+if( num >= 0 ){
+         println("Positive or Zero");
+      } else {
+         println("Negative number");}
+
+If-elif-else:
+if( num >10 ){
+         println("Positive numbe");
+      } else if( num == 0 ){
+         println("Zero");
+      } else{
+         println("Negative number");
+      }
+
+Functions
+
+def addition( x:Int ) : Int = {
+     var y = x+2
+      return y
+ }
+
+
+var i = 5
+addition(i)
+
+var square = (x:Int) => x*x
+square(2)
+
+class Arithmetic_operations() {
+  def addition(a: Int, b: Int): Unit = {
+         println("additon method",a+b)
+           }
+           def sub(a: Int, b: Int): Unit = {
+         println("additon method",a-b)
+           }
+}
+
+
+var obj1 =new Arithmetic_operations() 
+
+
+obj1.addition(10,20)
+
+obj1.sub(40,20)
+
+
+
+
