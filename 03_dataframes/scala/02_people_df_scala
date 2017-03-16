@@ -1,0 +1,124 @@
+val rdd = sc.textFile("/mnt/learningspark/people.txt")
+
+
+
+
+rdd.take(10).foreach(println)
+
+
+
+
+import sqlContext.implicits._
+import java.util.Date
+import java.text.SimpleDateFormat
+import java.sql.Timestamp
+
+
+
+
+val dateFmt = new SimpleDateFormat("yyyy-MM-dd")
+
+
+
+
+case class Person(firstName:  String,
+                  middleName: String,
+                  lastName:   String,
+		          gender:     String,
+                  birthDate:  Timestamp,
+                  salary:     Int,
+                  ssn:        String)
+
+
+
+
+val peopleRDD = rdd.map { line =>
+  val cols = line.split(":")
+  Person(firstName  = cols(0),
+         middleName = cols(1), 
+         lastName   = cols(2), 
+         gender     = cols(3),
+         birthDate  = new Timestamp(dateFmt.parse(cols(4)).getTime),
+         salary     = cols(5).toInt,
+         ssn        = cols(6))
+}
+
+val df = peopleRDD.toDF
+
+
+
+
+df.count()
+
+
+
+df.registerTempTable("people")
+
+
+
+df.printSchema()
+
+
+
+
+df.show()
+
+
+
+df.select($"firstName", $"lastName", $"gender")
+
+
+
+
+df.select($"firstName", $"lastName", $"gender").show(10)
+
+
+
+
+df.filter($"gender" === "M")
+
+
+
+
+val df2 = df.filter($"gender" === "M").filter($"salary" > 100000).select($"firstName", $"lastName", $"salary")
+
+
+
+
+df.filter($"birthDate" >= "1970-01-01" && $"birthDate" <= "1979-12-31").orderBy(df("birthDate"), df("salary")).show()
+
+
+
+df.groupBy($"salary")
+
+
+
+val x = df.groupBy($"salary").count()  
+
+
+
+df.groupBy($"salary").count().filter($"count" > 1).select($"salary", $"count".as("total")).show()
+
+
+
+
+val raw_df = spark.read.text("/mnt/learningspark/tweets.json").filter($"value".contains("@"))
+
+
+
+import org.apache.spark.sql.functions._
+val df1 = raw_df.select(explode(split('value, " ")).as("word")).
+           filter($"word".startsWith("@"))
+
+
+
+df1.show()
+
+
+
+df1.groupBy($"word").agg(count($"word")).
+         orderBy($"count(word)".desc).show(5)
+
+
+
+
