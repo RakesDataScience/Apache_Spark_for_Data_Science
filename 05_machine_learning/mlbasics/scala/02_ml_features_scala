@@ -1,0 +1,283 @@
+
+ Tokenizer
+
+
+
+import org.apache.spark.ml.feature.{RegexTokenizer, Tokenizer}
+import org.apache.spark.sql.functions._
+
+val sentenceDataFrame = spark.createDataFrame(Seq(
+  (0, "Hi I heard about Spark"),
+  (1, "I wish Java could use case classes"),
+  (2, "Logistic,regression,models,are,neat")
+)).toDF("id", "sentence")
+
+val tokenizer = new Tokenizer().setInputCol("sentence").setOutputCol("words")
+
+val countTokens = udf { (words: Seq[String]) => words.length }
+
+val tokenized = tokenizer.transform(sentenceDataFrame)
+tokenized.select("sentence", "words")
+    .withColumn("tokens", countTokens(col("words"))).show(false)
+
+
+
+
+import org.apache.spark.ml.feature.RegexTokenizer
+val date_pattern: String = "\\d{1,4}[/ -]\\d{1,4}[/ -]\\d{1,4}"
+
+
+
+val textDF  = spark.createDataFrame(Seq(
+        (1, "Hello 1996-12-12 this 1-21-1111 is a 18-9-96 text "),
+        (2, "string with dates in different 01/02/89 formats"))).
+        toDF("LineNo","Text")
+
+
+
+val date_regex = new RegexTokenizer().
+            setInputCol("Text").setOutputCol("dateStr").
+            setPattern(date_pattern).setGaps(false)
+
+
+
+
+date_regex.transform(textDF).select("dateStr").show(false) 
+
+
+
+
+ StopWordsRemover
+
+
+
+import org.apache.spark.ml.feature.StopWordsRemover
+
+val remover = new StopWordsRemover()
+  .setInputCol("raw")
+  .setOutputCol("filtered")
+
+val dataSet = spark.createDataFrame(Seq(
+  (0, Seq("I", "saw", "the", "red", "balloon")),
+  (1, Seq("Mary", "had", "a", "little", "lamb"))
+)).toDF("id", "raw")
+
+remover.transform(dataSet).show(false)
+
+
+
+import org.apache.spark.ml.feature.StopWordsRemover
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.ml.linalg.Vector
+
+
+
+val rawdataDF = spark.createDataFrame(Seq(
+        (0, Array("I", "ate", "the", "cake")),
+        (1, Array("John ", "had", "a", " tennis", "racquet")))).
+         toDF("id","raw_text")
+
+
+
+val remover = new StopWordsRemover().setInputCol("raw_text").
+                    setOutputCol("processed_text")
+
+
+
+remover.transform(rawdataDF).show(truncate=false)
+
+
+
+ n -gram
+
+
+
+import org.apache.spark.ml.feature.NGram
+
+val wordDataFrame = spark.createDataFrame(Seq(
+  (0, Array("Hi", "I", "heard", "about", "Spark")),
+  (1, Array("I", "wish", "Java", "could", "use", "case", "classes")),
+  (2, Array("Logistic", "regression", "models", "are", "neat"))
+)).toDF("id", "words")
+
+val ngram = new NGram().setN(2).setInputCol("words").setOutputCol("ngrams")
+
+val ngramDataFrame = ngram.transform(wordDataFrame)
+ngramDataFrame.select("words","ngrams").show(false)
+
+
+
+val wordDF = spark.createDataFrame(Seq(
+         (0, Array("Hi", "I", "am", "a", "Scientist")),
+         (1, Array("I", "am", "just", "learning", "Spark")),
+         (2, Array("Coding", "in", "Scala", "is", "easy"))
+         )).toDF("label", "words")
+
+
+
+val ngramModel = new NGram().setInputCol(
+              "words").setOutputCol("ngrams").setN(3)
+
+
+
+ ngramModel.transform(wordDF).select("words","ngrams").show(false)
+
+
+
+
+ StringIndexer
+
+
+
+import org.apache.spark.ml.feature.StringIndexer
+
+val df = spark.createDataFrame(
+  Seq((0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c"))
+).toDF("id", "category")
+
+val indexer = new StringIndexer()
+  .setInputCol("category")
+  .setOutputCol("categoryIndex")
+
+val indexed = indexer.fit(df).transform(df)
+indexed.show()
+
+
+
+ IndexToString
+
+
+
+import org.apache.spark.ml.attribute.Attribute
+import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
+
+val df = spark.createDataFrame(Seq(
+  (0, "a"),
+  (1, "b"),
+  (2, "c"),
+  (3, "a"),
+  (4, "a"),
+  (5, "c")
+)).toDF("id", "category")
+
+val indexer = new StringIndexer()
+  .setInputCol("category")
+  .setOutputCol("categoryIndex")
+  .fit(df)
+val indexed = indexer.transform(df)
+
+println(s"Transformed string column '${indexer.getInputCol}' " +
+    s"to indexed column '${indexer.getOutputCol}'")
+indexed.show()
+
+val inputColSchema = indexed.schema(indexer.getOutputCol)
+println(s"StringIndexer will store labels in output column metadata: " +
+    s"${Attribute.fromStructField(inputColSchema).toString}\n")
+
+val converter = new IndexToString()
+  .setInputCol("categoryIndex")
+  .setOutputCol("originalCategory")
+
+val converted = converter.transform(indexed)
+
+println(s"Transformed indexed column '${converter.getInputCol}' back to original string " +
+    s"column '${converter.getOutputCol}' using labels in metadata")
+converted.select("id", "categoryIndex", "originalCategory").show()
+
+
+
+ TF-IDF
+
+
+
+import org.apache.spark.ml.feature.{HashingTF, IDF, Tokenizer}
+
+val sentenceData = spark.createDataFrame(Seq(
+  (0.0, "Hi I heard about Spark"),
+  (0.0, "I wish Java could use case classes"),
+  (1.0, "Logistic regression models are neat")
+)).toDF("label", "sentence")
+
+val tokenizer = new Tokenizer().setInputCol("sentence").setOutputCol("words")
+val wordsData = tokenizer.transform(sentenceData)
+
+val hashingTF = new HashingTF()
+  .setInputCol("words").setOutputCol("rawFeatures").setNumFeatures(20)
+
+val featurizedData = hashingTF.transform(wordsData)
+// alternatively, CountVectorizer can also be used to get term frequency vectors
+
+val idf = new IDF().setInputCol("rawFeatures").setOutputCol("features")
+val idfModel = idf.fit(featurizedData)
+
+val rescaledData = idfModel.transform(featurizedData)
+rescaledData.select("label", "features").show()
+
+
+
+ Word2Vec
+
+
+
+import org.apache.spark.ml.feature.Word2Vec
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.sql.Row
+
+// Input data: Each row is a bag of words from a sentence or document.
+val documentDF = spark.createDataFrame(Seq(
+  "Hi I heard about Spark".split(" "),
+  "I wish Java could use case classes".split(" "),
+  "Logistic regression models are neat".split(" ")
+).map(Tuple1.apply)).toDF("text")
+
+// Learn a mapping from words to Vectors.
+val word2Vec = new Word2Vec()
+  .setInputCol("text")
+  .setOutputCol("result")
+  .setVectorSize(3)
+  .setMinCount(0)
+val model = word2Vec.fit(documentDF)
+
+val result = model.transform(documentDF)
+result.collect().foreach { case Row(text: Seq[_], features: Vector) =>
+  println(s"Text: [${text.mkString(", ")}] => \nVector: $features\n") }
+
+
+
+
+
+
+
+import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel}
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.ml.linalg.Vector
+
+
+
+
+val df: DataFrame = spark.createDataFrame(Seq(
+  (0, Array("ant", "bat", "cat", "dog", "eel")),
+  (1, Array("dog","bat", "ant", "bat", "cat"))
+)).toDF("id", "words")
+
+
+
+val cvModel: CountVectorizerModel = new CountVectorizer().
+          setInputCol("words").setOutputCol("features").
+          setMinDF(2).setVocabSize(10).fit(df)
+
+
+
+cvModel.vocabulary
+
+
+
+val cvDF: DataFrame = cvModel.transform(df)
+
+
+
+cvDF.show()
+
+
+
+
