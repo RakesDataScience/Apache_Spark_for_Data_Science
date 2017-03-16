@@ -1,0 +1,244 @@
+
+ Tokenizer
+
+
+
+from pyspark.ml.feature import Tokenizer, RegexTokenizer
+from pyspark.sql.functions import col, udf
+from pyspark.sql.types import IntegerType
+
+sentenceDataFrame = spark.createDataFrame([
+    (0, "Hi I heard about Spark"),
+    (1, "I wish Java could use case classes"),
+    (2, "Logistic regression models are neat")
+], ["id", "sentence"])
+
+tokenizer = Tokenizer(inputCol="sentence", outputCol="words")
+
+tokenized = tokenizer.transform(sentenceDataFrame)
+tokenized.select("sentence", "words")\
+    .withColumn("tokens", countTokens(col("words"))).show(truncate=False)
+
+
+
+
+
+from pyspark.ml.feature import RegexTokenizer
+date_pattern = "\\d{1,4}[/ -]\\d{1,4}[/ -]\\d{1,4}"
+
+
+
+textDF  = spark.createDataFrame([
+        [1, "Hello 1996-12-12 this 1-21-1111 is a 18-9-96 text "],
+        [2, "string with dates in different 01/02/89 formats"]]).toDF(
+        "LineNo","Text")
+
+
+
+date_regex = RegexTokenizer(inputCol="Text",outputCol="dateStr",
+                gaps=False, pattern=date_pattern)
+
+
+
+
+date_regex.transform(textDF).select("dateStr").show(5,False)
+
+
+
+ StopWordsRemover
+
+
+
+from pyspark.ml.feature import StopWordsRemover
+
+sentenceData = spark.createDataFrame([
+    (0, ["I", "saw", "the", "red", "balloon"]),
+    (1, ["Mary", "had", "a", "little", "lamb"])
+], ["id", "raw"])
+
+remover = StopWordsRemover(inputCol="raw", outputCol="filtered")
+remover.transform(sentenceData).show(truncate=False)
+
+
+
+RawData = sqlContext.createDataFrame([
+    (0, ["I", "ate", "the", "cake"]),
+    (1, ["John ", "had", "a", " tennis", "racquet"])
+    ], ["id", "raw_text"])
+
+
+
+remover = StopWordsRemover(inputCol="raw_text", 
+                outputCol="processed_text")
+
+
+
+remover.transform(RawData).show(truncate=False)
+
+
+
+ n -gram
+
+
+
+from pyspark.ml.feature import NGram
+
+wordDataFrame = spark.createDataFrame([
+    (0, ["Hi", "I", "heard", "about", "Spark"]),
+    (1, ["I", "wish", "Java", "could", "use", "case", "classes"]),
+    (2, ["Logistic", "regression", "models", "are", "neat"])
+], ["id", "words"])
+
+ngram = NGram(n=2, inputCol="words", outputCol="ngrams")
+
+ngramDataFrame = ngram.transform(wordDataFrame)
+ngramDataFrame.select("words","ngrams").show(truncate=False)
+
+
+
+wordDF = spark.createDataFrame([
+         [0, ["Hi", "I", "am", "a", "Scientist"]],
+         [1, ["I", "am", "just", "learning", "Spark"]],
+         [2, ["Coding", "in", "Scala", "is", "easy"]]
+         ]).toDF("label", "words")
+
+
+
+
+ngramModel = NGram(inputCol="words", outputCol= "ngrams",n=3)
+
+
+
+ngramModel.transform(wordDF).select("words","ngrams").show(4,False)
+
+
+
+ StringIndexer
+
+
+
+from pyspark.ml.feature import StringIndexer
+
+df = spark.createDataFrame(
+    [(0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")],
+    ["id", "category"])
+
+indexer = StringIndexer(inputCol="category", outputCol="categoryIndex")
+indexed = indexer.fit(df).transform(df)
+indexed.show()
+
+
+
+ IndexToString
+
+
+
+from pyspark.ml.feature import IndexToString, StringIndexer
+
+df = spark.createDataFrame(
+    [(0, "a"), (1, "b"), (2, "c"), (3, "a"), (4, "a"), (5, "c")],
+    ["id", "category"])
+
+indexer = StringIndexer(inputCol="category", outputCol="categoryIndex")
+model = indexer.fit(df)
+indexed = model.transform(df)
+
+print("Transformed string column '%s' to indexed column '%s'"
+      % (indexer.getInputCol(), indexer.getOutputCol()))
+indexed.show()
+
+print("StringIndexer will store labels in output column metadata\n")
+
+converter = IndexToString(inputCol="categoryIndex", outputCol="originalCategory")
+converted = converter.transform(indexed)
+
+print("Transformed indexed column '%s' back to original string column '%s' using "
+      "labels in metadata" % (converter.getInputCol(), converter.getOutputCol()))
+converted.select("id", "categoryIndex", "originalCategory").show()
+
+
+
+  TF-IDF
+
+
+
+from pyspark.ml.feature import HashingTF, IDF, Tokenizer
+
+sentenceData = spark.createDataFrame([
+    (0.0, "Hi I heard about Spark"),
+    (0.0, "I wish Java could use case classes"),
+    (1.0, "Logistic regression models are neat")
+], ["label", "sentence"])
+
+tokenizer = Tokenizer(inputCol="sentence", outputCol="words")
+wordsData = tokenizer.transform(sentenceData)
+
+hashingTF = HashingTF(inputCol="words", outputCol="rawFeatures", numFeatures=20)
+featurizedData = hashingTF.transform(wordsData)
+# alternatively, CountVectorizer can also be used to get term frequency vectors
+
+idf = IDF(inputCol="rawFeatures", outputCol="features")
+idfModel = idf.fit(featurizedData)
+rescaledData = idfModel.transform(featurizedData)
+
+rescaledData.select("label","words" ,"features").show()
+
+
+
+ Word2Vec
+
+
+
+from pyspark.ml.feature import Word2Vec
+
+# Input data: Each row is a bag of words from a sentence or document.
+documentDF = spark.createDataFrame([
+    ("Hi I heard about Spark".split(" "), ),
+    ("I wish Java could use case classes".split(" "), ),
+    ("Logistic regression models are neat".split(" "), )
+], ["text"])
+
+# Learn a mapping from words to Vectors.
+word2Vec = Word2Vec(vectorSize=3, minCount=0, inputCol="text", outputCol="result")
+model = word2Vec.fit(documentDF)
+
+result = model.transform(documentDF)
+for row in result.collect():
+    text, vector = row
+    print("Text: [%s] => \nVector: %s\n" % (", ".join(text), str(vector)))
+
+
+
+ CountVectorizerModel
+
+
+
+from pyspark.ml.feature import CountVectorizer,CountVectorizerModel
+from pyspark.ml.linalg import Vector
+
+df = spark.createDataFrame([
+  [0, ["ant", "bat", "cat", "dog", "eel"]],
+  [1, ["dog","bat", "ant", "bat", "cat"]]
+ ]).toDF("id", "words")
+
+
+
+cvModel = CountVectorizer(inputCol="words", outputCol="features",
+                minDF = 2, vocabSize = 10).fit(df)
+
+
+
+
+cvModel.vocabulary
+
+
+
+cvDF = cvModel.transform(df)
+
+
+
+cvDF.show(2,False)
+
+
+
+
