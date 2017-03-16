@@ -1,0 +1,87 @@
+iris_df = spark.read.csv('mnt/learningspark/iris.data.txt',inferSchema = True)
+
+
+
+#Viewig data
+iris_df.show()
+
+
+
+
+iris_df.dtypes
+
+
+
+#Count number of data point
+iris_df.count()
+
+
+#Renaming columns
+oldColumns = iris_df.schema.names
+newColumns = ['sepal_length_in_cm', 'sepal_width_in_cm', 'petal_length_in_cm',
+       'petal_width_in_cm', 'class']
+
+df = reduce(lambda iris_df, idx: iris_df.withColumnRenamed(oldColumns[idx], newColumns[idx]), xrange(len(oldColumns)), iris_df)
+
+
+df.printSchema()
+
+
+
+df.select("class").distinct().show()
+
+
+
+
+features = df.drop('class')
+
+
+
+training_data, testing_data = df.randomSplit([0.8, 0.2])
+
+
+
+from pyspark.ml.feature import VectorAssembler
+
+
+
+vecAssembler = VectorAssembler(inputCols=features.columns, outputCol="features")
+
+
+
+from pyspark.ml.feature import StringIndexer
+
+
+
+indexer = StringIndexer(inputCol="class", outputCol="classIndex")
+
+
+
+
+
+
+from pyspark.ml.classification import RandomForestClassifier
+
+rf = RandomForestClassifier(labelCol="classIndex", featuresCol="features", numTrees=10)
+
+
+
+from pyspark.ml import Pipeline
+pipeline = Pipeline(stages=[vecAssembler, indexer, rf])
+pipelineModel = pipeline.fit(training_data)
+
+
+predictions = pipelineModel.transform(testing_data)
+
+
+
+from pyspark.ml.evaluation import MulticlassClassificationEvaluator
+
+evaluator = MulticlassClassificationEvaluator(
+    labelCol="classIndex", predictionCol="prediction", metricName="accuracy")
+accuracy = evaluator.evaluate(predictions)
+print("Accuracy_lg  = %g "%(accuracy))
+print("Test Error = %g " % (1.0 - accuracy))
+
+
+
