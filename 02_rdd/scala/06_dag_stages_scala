@@ -1,0 +1,80 @@
+val wordList = Array("cat", "cat", "fish", "dog", "fish")
+
+
+
+
+val wordsRDD = sc.parallelize(wordList, 1)
+
+
+
+
+wordsRDD.count()
+
+
+
+
+wordsRDD.partitions.length
+
+
+
+wordsRDD.collect()
+
+
+
+
+val wordsRDDWith2Partitions = sc.parallelize(wordList, 2)
+
+
+
+
+wordsRDDWith2Partitions.collect()
+
+
+
+
+for (p <- wordsRDDWith2Partitions.glom.collect())
+  println(p.toSeq)
+
+
+
+
+val ebookRDD = sc.textFile("mnt/learningspark/tom_sawyer.txt", 2)
+
+
+
+
+ebookRDD.count()
+
+
+
+
+ebookRDD.partitions.length
+
+
+
+
+ebookRDD.getClass
+
+
+
+for ((p, i) <- ebookRDD.glom.collect().zipWithIndex)
+  println(s"$i: ${p.length} item(s)")
+
+
+
+sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).collect()
+
+
+
+
+sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).map(word => (word, 1)).collect()
+
+
+
+
+sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((x, y) => x + y).collect()
+
+
+
+
+
