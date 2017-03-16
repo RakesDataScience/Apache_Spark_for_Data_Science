@@ -1,0 +1,33 @@
+spark_info_rdd = sc.textFile('/mnt/learningspark/spark_info.txt')
+spark_info_rdd.collect()
+spark_info_rdd.count()
+spark_info_rdd.first()
+
+spark_lines = spark_info_rdd.filter(lambda line : "Spark" in line)
+spark_lines.collect()
+
+scala_lines = spark_info_rdd.filter(lambda line : "Scala" in line)
+scala_lines.collect()
+
+map_words = spark_info_rdd.map(lambda line : line.split(" "))
+map_words.collect()
+
+flat_map_words = spark_info_rdd.flatMap(lambda line : line.split(" "))
+flat_map_words.collect()
+
+word_with_one = flat_map_words.map(lambda word : (word,1))
+word_with_one.collect()
+
+word_count = word_with_one.reduceByKey(lambda x,y : x + y)
+
+sales_rdd = sc.textFile('/mnt/learningspark/sales.txt').map(lambda line: line.split(",")).map(lambda record: (record[0], record[1], record[2]))
+sales_rdd.count()
+numPurchases = sales_rdd.count()
+numPurchases
+uniqueUsers = sales_rdd.map(lambda record: record[0]).distinct().count()
+# let's sum up our total revenue
+totalRevenue = sales_rdd.map(lambda record: float(record[2])).sum()
+totalRevenue
+products = sales_rdd.map(lambda record: (record[1], 1.0)).reduceByKey(lambda a, b: a + b).collect()
+mostPopular = sorted(products, key=lambda x: x[1], reverse=True)[0]
+mostPopular
