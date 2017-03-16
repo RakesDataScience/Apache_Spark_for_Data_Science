@@ -1,0 +1,102 @@
+
+colors = ['white','green','yellow','red','brown','pink']
+color_df = sc.parallelize(colors).map(lambda x:(x,len(x))).toDF(['color','length'])
+color_df
+color_df.dtypes
+color_df.show()
+
+Drop a column
+color_df.drop('length').show()
+color_df_json  = color_df.toJSON()
+color_df.toJSON.first()
+color_df_json.collect()
+color_df.filter(color_df.length.between(4,5)).select(color_df.color.alias('mid_length')).show()
+
+color_df.filter(color_df.length > 4).filter(color_df[0]!='white').show()
+color_df.sort('color').show()
+
+color_df.filter(color_df['length']>=4).sort("length", 'color',ascending=False).show()
+
+color_df.groupBy('length').count().show()
+
+Creating DataFrame from json file
+df = sqlContext.read.json('/mnt/learningspark/authors.json')
+df.show()
+df1 = sqlContext.read.json('/mnt/learningspark/authors_missing.json')
+df1.show()
+df2 = df1.dropna()
+df2.show()
+monthlySales = spark.read.csv('/mnt/learningspark/MonthlySales.csv',header=True, inferSchema=True)
+monthlySales.show()
+
+employees = sc.parallelize([(1, "John", 25), (2, "Ray", 35), (3, "Mike", 24), (4, "Jane", 28), (5, "Kevin", 26), (6, "Vincent", 35), (7, "James", 38), (8, "Shane", 32), (9, "Larry", 29), (10, "Kimberly", 29), (11, "Alex", 28), (12, "Garry", 25), (13, "Max", 31)]).toDF(["emp_id","name","age"])
+employees.show()
+salary = sqlContext.read.json("/mnt/learningspark/salary.json")
+salary.show()
+designation = sqlContext.read.json("/mnt/learningspark/designation.json")
+designation.show()
+
+final_data = employees.join(salary, employees.emp_id == salary.e_id).join(designation, employees.emp_id == designation.id).select("emp_id", "name", "age", "role", "salary")
+final_data.show()
+final_data.count()
+clean_data = final_data.na.drop()
+clean_data.count()
+
+import math
+from pyspark.sql import functions as F
+
+mean_salary = salary.select(F.mean('salary')).collect()[0][0]
+mean_salary
+clean_data = final_data.na.fill({"salary" : mean_salary})
+clean_data.show()
+
+authors = [['Thomas','Hardy','June 2, 1840'],
+	['Charles','Dickens','7 February 1812'],
+        ['Mark','Twain',None],
+        ['Jane','Austen','16 December 1775'],
+        ['Emily',None,None]]
+
+df1 = sc.parallelize(authors).toDF(["FirstName","LastName","Dob"])
+df1.show()
+df1.na.drop().show()
+#Drop rows with at least 2 missing values
+df1.na.drop(thresh=2).show()
+#Fill all missing values with a given string
+df1.na.fill('Unknown').show()
+#Fill missing values in each column with a given string
+df1.na.fill({'LastName':'--','Dob':'Unknown'}).show()
+
+authors = [['Thomas','Hardy','June 2,1840'],
+    ['Thomas','Hardy','June 2,1840'],
+    ['Thomas','H',None],
+    ['Jane','Austen','16 December 1775'],
+    ['Emily',None,None]]
+
+
+df1 = sc.parallelize(authors).toDF(["FirstName","LastName","Dob"])
+df1.show()
+df1.dropDuplicates().show()
+
+#Drop duplicates based on a sub set of columns
+df1.dropDuplicates(subset=["FirstName"]).show()
+import pyspark.sql.functions
+
+concat_func = pyspark.sql.functions.udf(lambda name, age: name + "_" + str(age))
+final_data.show()
+concat_df = final_data.withColumn("name_age", concat_func(final_data.name, final_data.age))
+concat_df.show()
+#Adding constant to data
+
+data_new = concat_df.withColumn("age_incremented",concat_df.age + 10)
+data_new.show(4)
+#Replace values in a column
+df1.show()
+df1.replace('Emily','Charlotte','FirstName').show()
+#//Append new columns based on existing values in a column
+#Give 'LastName' instead of 'Initial' if you want to overwrite
+df1.withColumn('Initial',df1.LastName.substr(1,1)).show()
+
+
+
+
+
