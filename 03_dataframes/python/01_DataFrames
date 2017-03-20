@@ -96,7 +96,3 @@ df1.replace('Emily','Charlotte','FirstName').show()
 #Give 'LastName' instead of 'Initial' if you want to overwrite
 df1.withColumn('Initial',df1.LastName.substr(1,1)).show()
 
-
-
-
-
