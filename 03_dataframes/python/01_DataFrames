@@ -16,6 +16,55 @@ color_df.filter(color_df['length']>=4).sort('color',ascending=False).show()
 
 color_df.groupBy('length').count().show()
 
+#Create DataFrame
+df = spark.read.csv('/mnt/learningspark/people-example.csv',header = 'True')
+df.show()
+
+#Column names
+df.columns
+
+#Aggregate on function 
+from pyspark.sql import functions as F
+
+df.agg(F.min(df.age)).collect()
+df.agg(F.max(df.age)).collect()
+df.select(df['First Name']).show()
+
+df.filter(df['age'] >= 24).show()
+df.groupBy("age").count().show()
+from pyspark.sql.functions import concat_ws, coalesce, lit, trim
+
+def combine(*cols):
+    return trim(concat_ws(" ", *[coalesce(c, lit(" ")) for c in cols]))
+
+df = df.withColumn('Full Name', combine('First Name','Last Name'))
+
+#concat_ws(sep, *cols)
+#Concatenates multiple input string columns together into a single string column, using the given separator.
+#df = spark.createDataFrame([('abcd','123')], ['s', 'd'])
+#df.select(concat_ws('-', df.s, df.d).alias('s')).collect()
+
+#coalesce(cols)
+#Returns the first column that is not null.
+#cDf = spark.createDataFrame([(None, None), (1, None), (None, 2)], ("a", "b"))
+#cDf.show()
+#cDf.select(coalesce(cDf["a"], cDf["b"])).show()
+#cDf.select(coalesce(cDf["a"], cDf["b"])).show()
+#cDf.select(coalesce(cDf["a"], cDf["b"],lit(0.0))).show()
+#cDf.select('*', coalesce(cDf["a"], lit(0.0))).show()
+
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+
+def expand_country_name(county):
+    if county == 'USA': return 'United States'
+    else: return county
+
+
+expand_country_name_udf = udf(expand_country_name, StringType())
+df_new = df.withColumn("Country", expand_country_name_udf(df.Country))
+
+
 Creating DataFrame from json file
 df = sqlContext.read.json('/mnt/learningspark/authors.json')
 df.show()
