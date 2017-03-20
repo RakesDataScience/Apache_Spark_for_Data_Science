@@ -4,248 +4,75 @@ from pyspark.ml.linalg import Vectors
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.sql.functions import *
-
-
-
 sales = spark.read.csv('mnt/learningspark/home_data.csv',header = True,inferSchema = True)
-
-
-
-
 sales.dtypes
-
-
-
-
 sales.cache()
-
-
-
-
-
 sales.show()
-
-
-
-
 sales.printSchema()
-
-
-
 sqft_living_assembler = VectorAssembler(inputCols=["sqft_living"],outputCol="features")
-
-
-
-
 sqft_living_df= sqft_living_assembler.transform(sales)
-
-
-
 (trainingData, testData) = sqft_living_df.randomSplit([0.8, 0.2],seed = 11L)
-
-
-
-
 sqft_living_lr = LinearRegression(labelCol="price", featuresCol="features")
-
-
-
-
 sqft_living_lr_model = sqft_living_lr.fit(trainingData)
-
-
-
 sqft_living_predictions = sqft_living_lr_model.transform(testData)
-
-
-
-
 testData.select(mean('price').alias('price_value')).collect()
-
-
-
-
 evaluator = RegressionEvaluator(labelCol="price", predictionCol="prediction", metricName="rmse")
-
-
-
-
 sqft_rmse = evaluator.evaluate(sqft_living_predictions) 
-
-
-
-
 print("Root Mean Squared Error (RMSE) on test data = %g" % sqft_rmse)
-
-
-
-
 my_features = ['bedrooms', 'bathrooms', 'sqft_living', 'sqft_lot', 'floors', 'zipcode']
 sales.select(my_features).show()
-
-
-
 my_features_assembler = VectorAssembler(inputCols=my_features,outputCol="features")
-
-
-
-
 my_features_df= my_features_assembler.transform(sales)
-
-
-
-
 (my_features_trainingData, my_features_testData) = my_features_df.randomSplit([0.8, 0.2],seed = 11L)
-
-
-
-
 my_features_lr = LinearRegression(labelCol="price", featuresCol="features")
-
-
-
-
 my_features_model = my_features_lr.fit(my_features_trainingData)
-
-
-
-
 my_features_predictions = my_features_model.transform(my_features_testData)
-
-
-
-
 my_features_predictions.select("prediction", "price", "features").show(5)
-
-
-
-
 my_features_testData.select(mean('price').alias('price_value')).collect()  #544128.029162747
-
-
-
-
 evaluator = RegressionEvaluator(labelCol="price", predictionCol="prediction", metricName="rmse")
 rmse = evaluator.evaluate(my_features_predictions) #
 print("Root Mean Squared Error (RMSE) on test data = %g" % rmse) #273356 (previous 281234)
 
-
-
-
-# MAGIC %md Pipeline
-
-
-
+Pipeline
 (my_features_trainingData, my_features_testData) = sales.randomSplit([0.8, 0.2],seed = 11L)
-
-
-
-
 my_features_assembler = VectorAssembler(inputCols=my_features,outputCol="features")
 my_features_lr = LinearRegression(labelCol="price", featuresCol="features")
-
-
-
-
 
 from pyspark.ml import Pipeline
 pipeline = Pipeline(stages=[my_features_assembler, my_features_lr])
 pipelineModel = pipeline.fit(my_features_trainingData)
-
 predictions = pipelineModel.transform(my_features_testData)
-
 predictions.select("price", "prediction", "features").show()
 rmse = evaluator.evaluate(predictions)
 print "RMSE on our test set: %g" % rmse
 
-
-
-
-# MAGIC %md DecisionTreeRegressor
-
-
-
+DecisionTreeRegressor
 from pyspark.ml.regression import DecisionTreeRegressor
-
-
-
-
 dt = DecisionTreeRegressor(labelCol="price", featuresCol="features")
-
-
-
-
 pipeline_dt = Pipeline(stages=[my_features_assembler, dt])
 pipeline_dt_Model = pipeline_dt.fit(my_features_trainingData)
-
 predictions_dt = pipeline_dt_Model.transform(my_features_testData)
-
 predictions_dt.select("price", "prediction", "features").show()
-
-
-
-
 rmse_dt = evaluator.evaluate(predictions_dt)
 print "rmse_dt on our test set: %g" % rmse_dt
 
-
-
-# MAGIC %md RandomForestRegressor
-
-
+RandomForestRegressor
 
 from pyspark.ml.regression import RandomForestRegressor
-
-
-
-
 rf = RandomForestRegressor(labelCol="price", featuresCol="features")
-
-
-
-
 pipeline_rf = Pipeline(stages=[my_features_assembler, rf])
 pipeline_rf_Model = pipeline_rf.fit(my_features_trainingData)
-
 predictions_rf = pipeline_rf_Model.transform(my_features_testData)
-
 predictions_rf.select("price", "prediction", "features").show()
-
-
-
-
 rmse_rf = evaluator.evaluate(predictions_rf)
 print "rmse_rf on our test set: %g" % rmse_rf
 
-
-
-# MAGIC %md Gradient-boosted trees (GBTs)
-
-
-
+Gradient-boosted trees (GBTs)
 from pyspark.ml.regression import GBTRegressor
-
-
-
-
 gbt = GBTRegressor(labelCol="price", featuresCol="features")
-
-
-
-
 pipeline_gbt = Pipeline(stages=[my_features_assembler, gbt])
 pipeline_gbt_Model = pipeline_gbt.fit(my_features_trainingData)
-
 predictions_gbt = pipeline_gbt_Model.transform(my_features_testData)
-
 predictions_gbt.select("price", "prediction", "features").show()
-
-
-
-
 rmse_gbt = evaluator.evaluate(predictions_gbt)
 print "rmse_gbt on our test set: %g" % rmse_gbt
-
-
-
-
