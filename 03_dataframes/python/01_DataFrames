@@ -7,15 +7,12 @@ color_df.show()
 
 Drop a column
 color_df.drop('length').show()
-color_df_json  = color_df.toJSON()
-color_df.toJSON.first()
-color_df_json.collect()
 color_df.filter(color_df.length.between(4,5)).select(color_df.color.alias('mid_length')).show()
 
 color_df.filter(color_df.length > 4).filter(color_df[0]!='white').show()
 color_df.sort('color').show()
 
-color_df.filter(color_df['length']>=4).sort("length", 'color',ascending=False).show()
+color_df.filter(color_df['length']>=4).sort('color',ascending=False).show()
 
 color_df.groupBy('length').count().show()
 
