@@ -106,9 +106,6 @@ df = (no_header_rdd.map(make_row).
       filter(lambda d: BAD_OFFENSE_RE.search(d.offense) is None).
       toDF())
 
-
-
-
 from pyspark.sql.functions import *
  
 df.filter(lower(df['offense']).like('%homicide%')).select(month(df['date']).alias("month"), df['offense']).groupBy('month').count()
@@ -116,9 +113,3 @@ df.filter(lower(df['offense']).like('%homicide%')).select(month(df['date']).alia
 df.select(month(df['date']).alias('month')).groupBy('month').count()
 
 df.select(hour(df["time"]).alias("hour"), df["offense"]).groupBy("hour").count()
-
-
-
-
-
-
