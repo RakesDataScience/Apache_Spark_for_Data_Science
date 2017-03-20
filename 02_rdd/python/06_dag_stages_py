@@ -10,9 +10,6 @@ sc.textFile(datapath, 2).collect()
 
 ebook = sc.textFile(datapath, 2).collect()
 
-# Why doesn’t this work?
-ebook.count()
-
 ebookRDD = sc.textFile(datapath, 2)
 
 ebookRDD.count()
@@ -33,13 +30,5 @@ for (p, i) in ebookRDD.glom().zipWithIndex().collect():
 
 sc.textFile(datapath, 2).flatMap(lambda x: x.split(' ')).collect()
 
-
 sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).collect()
-
-
 sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).reduceByKey(lambda x, y: x + y).collect()
-
-
-
-
-
