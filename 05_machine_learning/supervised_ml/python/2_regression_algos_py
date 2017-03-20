@@ -1,8 +1,4 @@
 df = spark.read.csv('mnt/learningspark/hour.csv',header = 'True')
-
-
-
-
 df.show()
 print "Our dataset has %d rows." % df.count()
 df = df.drop("instant").drop("dteday").drop("casual").drop("registered")
@@ -14,25 +10,16 @@ df.printSchema()
 train, test = df.randomSplit([0.7, 0.3])
 print "We have %d training examples and %d test examples." % (train.count(), test.count())
 
-
-
 from pyspark.ml.feature import VectorAssembler, VectorIndexer
 featuresCols = df.columns
 featuresCols.remove('cnt')
 
-
-
 vectorAssembler = VectorAssembler(inputCols=featuresCols, outputCol="rawFeatures")
 # This identifies categorical features and indexes them.
 vectorIndexer = VectorIndexer(inputCol="rawFeatures", outputCol="features", maxCategories=4)
-
 from pyspark.ml.regression import GBTRegressor
 # Takes the "features" column and learns to predict "cnt"
 gbt = GBTRegressor(labelCol="cnt")
-
-
-
-
 
 from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
 from pyspark.ml.evaluation import RegressionEvaluator
@@ -41,23 +28,12 @@ paramGrid = ParamGridBuilder()\
   .addGrid(gbt.maxIter, [10, 100])\
   .build()
 
-
-
 evaluator = RegressionEvaluator(metricName="rmse", labelCol=gbt.getLabelCol(), predictionCol=gbt.getPredictionCol())
-
 cv = CrossValidator(estimator=gbt, evaluator=evaluator, estimatorParamMaps=paramGrid)
-
 from pyspark.ml import Pipeline
 pipeline = Pipeline(stages=[vectorAssembler, vectorIndexer, cv])
 pipelineModel = pipeline.fit(train)
-
 predictions = pipelineModel.transform(test)
-
 predictions.select("cnt", "prediction", *featuresCols)
 rmse = evaluator.evaluate(predictions)
 print "RMSE on our test set: %g" % rmse
-
-
-
-
-
