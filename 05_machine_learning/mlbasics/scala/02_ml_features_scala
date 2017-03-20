@@ -1,7 +1,5 @@
 
- Tokenizer
-
-
+Tokenizer
 
 import org.apache.spark.ml.feature.{RegexTokenizer, Tokenizer}
 import org.apache.spark.sql.functions._
@@ -20,37 +18,21 @@ val tokenized = tokenizer.transform(sentenceDataFrame)
 tokenized.select("sentence", "words")
     .withColumn("tokens", countTokens(col("words"))).show(false)
 
-
-
-
 import org.apache.spark.ml.feature.RegexTokenizer
 val date_pattern: String = "\\d{1,4}[/ -]\\d{1,4}[/ -]\\d{1,4}"
-
-
 
 val textDF  = spark.createDataFrame(Seq(
         (1, "Hello 1996-12-12 this 1-21-1111 is a 18-9-96 text "),
         (2, "string with dates in different 01/02/89 formats"))).
         toDF("LineNo","Text")
 
-
-
 val date_regex = new RegexTokenizer().
             setInputCol("Text").setOutputCol("dateStr").
             setPattern(date_pattern).setGaps(false)
 
-
-
-
 date_regex.transform(textDF).select("dateStr").show(false) 
 
-
-
-
- StopWordsRemover
-
-
-
+StopWordsRemover
 import org.apache.spark.ml.feature.StopWordsRemover
 
 val remover = new StopWordsRemover()
@@ -64,33 +46,21 @@ val dataSet = spark.createDataFrame(Seq(
 
 remover.transform(dataSet).show(false)
 
-
-
 import org.apache.spark.ml.feature.StopWordsRemover
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.linalg.Vector
-
-
 
 val rawdataDF = spark.createDataFrame(Seq(
         (0, Array("I", "ate", "the", "cake")),
         (1, Array("John ", "had", "a", " tennis", "racquet")))).
          toDF("id","raw_text")
 
-
-
 val remover = new StopWordsRemover().setInputCol("raw_text").
                     setOutputCol("processed_text")
 
-
-
 remover.transform(rawdataDF).show(truncate=false)
 
-
-
- n -gram
-
-
+n -gram
 
 import org.apache.spark.ml.feature.NGram
 
@@ -104,31 +74,18 @@ val ngram = new NGram().setN(2).setInputCol("words").setOutputCol("ngrams")
 
 val ngramDataFrame = ngram.transform(wordDataFrame)
 ngramDataFrame.select("words","ngrams").show(false)
-
-
-
 val wordDF = spark.createDataFrame(Seq(
          (0, Array("Hi", "I", "am", "a", "Scientist")),
          (1, Array("I", "am", "just", "learning", "Spark")),
          (2, Array("Coding", "in", "Scala", "is", "easy"))
          )).toDF("label", "words")
 
-
-
 val ngramModel = new NGram().setInputCol(
               "words").setOutputCol("ngrams").setN(3)
 
+ngramModel.transform(wordDF).select("words","ngrams").show(false)
 
-
- ngramModel.transform(wordDF).select("words","ngrams").show(false)
-
-
-
-
- StringIndexer
-
-
-
+StringIndexer
 import org.apache.spark.ml.feature.StringIndexer
 
 val df = spark.createDataFrame(
@@ -142,11 +99,7 @@ val indexer = new StringIndexer()
 val indexed = indexer.fit(df).transform(df)
 indexed.show()
 
-
-
- IndexToString
-
-
+IndexToString
 
 import org.apache.spark.ml.attribute.Attribute
 import org.apache.spark.ml.feature.{IndexToString, StringIndexer}
@@ -184,11 +137,7 @@ println(s"Transformed indexed column '${converter.getInputCol}' back to original
     s"column '${converter.getOutputCol}' using labels in metadata")
 converted.select("id", "categoryIndex", "originalCategory").show()
 
-
-
- TF-IDF
-
-
+TF-IDF
 
 import org.apache.spark.ml.feature.{HashingTF, IDF, Tokenizer}
 
@@ -213,12 +162,7 @@ val idfModel = idf.fit(featurizedData)
 val rescaledData = idfModel.transform(featurizedData)
 rescaledData.select("label", "features").show()
 
-
-
- Word2Vec
-
-
-
+Word2Vec
 import org.apache.spark.ml.feature.Word2Vec
 import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.Row
@@ -242,18 +186,9 @@ val result = model.transform(documentDF)
 result.collect().foreach { case Row(text: Seq[_], features: Vector) =>
   println(s"Text: [${text.mkString(", ")}] => \nVector: $features\n") }
 
-
-
-
-
-
-
 import org.apache.spark.ml.feature.{CountVectorizer, CountVectorizerModel}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.ml.linalg.Vector
-
-
-
 
 val df: DataFrame = spark.createDataFrame(Seq(
   (0, Array("ant", "bat", "cat", "dog", "eel")),
@@ -266,16 +201,9 @@ val cvModel: CountVectorizerModel = new CountVectorizer().
           setInputCol("words").setOutputCol("features").
           setMinDF(2).setVocabSize(10).fit(df)
 
-
-
 cvModel.vocabulary
 
-
-
 val cvDF: DataFrame = cvModel.transform(df)
-
-
-
 cvDF.show()
 
 
