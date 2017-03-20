@@ -32,15 +32,12 @@ selected = prediction.select("id", "text", "prediction")
 for row in selected.collect():
     print(row)
 
-
-
 from pyspark.ml.pipeline import Pipeline
 from pyspark.ml.feature import Tokenizer, HashingTF, IDF, VectorAssembler, StringIndexer, VectorIndexer
 df2 = sqlContext.createDataFrame([
     [1,"Here is some text to illustrate pipeline"],
     [2,"and tfidf, which stands for term frequency inverse document frequency"
     ]]).toDF("LineNo","Text")
-
 
 tok = Tokenizer(inputCol="Text",outputCol="words")
 // HashingTF maps a sequence of words to their term frequencies using hashing
@@ -67,22 +64,15 @@ df2 = sqlContext.createDataFrame([
     [2,"and tfidf, which stands for term frequency inverse document frequency"
     ]]).toDF("LineNo","Text")
 
-
-
 tok = Tokenizer(inputCol="Text",outputCol="words")
 tf = HashingTF(inputCol="words", outputCol="tf",numFeatures=1000)
 idf = IDF(inputCol = "tf",outputCol="tf_idf")
 va = VectorAssembler(inputCols=["tf_idf"],outputCol="features")
 
-
 tfidf_pipeline = Pipeline(stages=[tok,tf,idf,va])
 tfidf_pipeline.getStages()
 
-
-
 result = tfidf_pipeline.fit(df2).transform(df2).select("words","features").collect()
-
-
 
 [(x[0],x[1]) for x in result]
 
