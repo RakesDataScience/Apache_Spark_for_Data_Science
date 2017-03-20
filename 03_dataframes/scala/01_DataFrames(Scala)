@@ -128,8 +128,6 @@ val concat_df = final_data.withColumn("name_age",
 
 concat_df.show()
 
-
-
 // Adding constant to data
 val addconst = udf((age: Integer) => {age + 10})
 
@@ -139,9 +137,6 @@ data_new.show()
 //Note: As of Spark 2.0.0, there is no replace on DataFrame/ Dataset does not work so .na. is a work around
 ds1.na.replace("FirstName",Map("Emily" -> "Charlotte")).show()
 ds1.withColumn("Initial",ds1("LastName").substr(1,1)).show()
-
-
-
 
 //Date conversions
 //Create udf for date conversion that converts incoming string to YYYY-MM-DD format
@@ -158,7 +153,4 @@ val authors = Seq(
         Author("Emily",null,null))
 val ds1 = sc.parallelize(authors).toDS()
 ds1.show()
-
-
-
 
