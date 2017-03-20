@@ -104,7 +104,3 @@ class Arithmetic_operations:
 obj1 =Arithmetic_operations()
 obj1.addition(10,20)
 obj1.sub(40,20)
-
-
-
-
