@@ -40,8 +40,3 @@ df1.join(broadcast(df2), df1["id"] == df2["id"]).collect()
 
 df2.cache().count()
 df1.join(df2, df1["id"] == df2["id"]).collect()
-
-
-
-
-
