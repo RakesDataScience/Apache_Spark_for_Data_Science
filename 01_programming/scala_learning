@@ -8,19 +8,26 @@ f.getClass
 
 var b = true
 var s = "This is a string!"
+//val and var Difference
+
+val a = 10
+a = 20
+var b = 50
+b = 80
+
 println(s)
+//List Creation
 val my_list =List()
 var my_list = List(1, 2, 3)
 println(my_list)
 
+//For loop
+
 for(i <- my_list){
        println(i);
       }
-
-
 var my_list = List(1, "Hello", 3.4)
 println(my_list)
-
 var my_list = ("mouse", List(8, 4, 6), List('a'))
 println(my_list)
 
@@ -29,19 +36,17 @@ println(my_list)
 println(my_list(0))
 println(my_list(2))
 
-set
+//Set Creation
+
 var a = Set()
 var my_set = Set(1, 2, 3)
 println(my_set)
 
+//For loop
+
 for s <-  my_set{
     println(s)
 }
-
-
-for(s <- my_set){
-       println(s);
-      }
 
 var my_set = Set(1.0, "Hello", (1, 2, 3))
 println(my_set)
@@ -49,13 +54,15 @@ println(my_set)
 my_set = Set(1,2,3,4,3,2)
 println(my_set)
 
-map
+//map Creation
+
 var my_map = Map()
 var my_map = Map(1 -> "apple", 2->"ball")
 for ((k,v) <- my_map) printf("key= %s, value= %s\n", k, v)
 var my_map = Map("name"-> "John", 1 ->List(2, 4, 3))
 println(my_dict)
 
+//if condition
 var num = 3
 if( num >0  ){
          println(num,"is a positive number.");}
@@ -66,6 +73,9 @@ if (num > 0){
 
 var num = -5
 //var num = 0
+
+//if - else condition
+
 if num >= 0{
     println("Positive or Zero")
 else:
@@ -78,29 +88,30 @@ if( num >= 0 ){
       } else {
          println("Negative number");}
 
-If-elif-else:
-if( num >10 ){
-         println("Positive numbe");
-      } else if( num == 0 ){
-         println("Zero");
-      } else{
-         println("Negative number");
-      }
+//if - else condition
 
-Functions
+if( num >10 ){
+println("Positive numbe");} 
+else if( num == 0 ){
+println("Zero");} 
+else{
+println("Negative number");}
+
+
+//Functions
 
 def addition( x:Int ) : Int = {
      var y = x+2
       return y
  }
-
-
 var i = 5
+//Calling Function
 addition(i)
 
 var square = (x:Int) => x*x
 square(2)
 
+//Class Creations
 class Arithmetic_operations() {
   def addition(a: Int, b: Int): Unit = {
          println("additon method",a+b)
@@ -110,12 +121,8 @@ class Arithmetic_operations() {
            }
 }
 
-
 var obj1 =new Arithmetic_operations() 
-
-
 obj1.addition(10,20)
-
 obj1.sub(40,20)
 
 
