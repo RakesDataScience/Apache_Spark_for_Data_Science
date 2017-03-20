@@ -38,10 +38,6 @@ val test = spark.createDataFrame(Seq(
   (7L, "apache hadoop")
 )).toDF("id", "text")
 
-
-
-
-
 model.transform(test)
   .select("id", "text", "probability", "prediction")
   .collect()
@@ -50,9 +46,7 @@ model.transform(test)
   }
 
 
-
-
-  import org.apache.spark.ml.{Pipeline, PipelineModel}
+import org.apache.spark.ml.{Pipeline, PipelineModel}
 import org.apache.spark.ml.classification.LogisticRegression
 import org.apache.spark.ml.feature.{HashingTF, Tokenizer,IDF}
 import org.apache.spark.ml.linalg.Vector
@@ -67,8 +61,6 @@ val df2 = spark.createDataFrame(Seq(
   (3L, "hadoop mapreduce")
 )).toDF("LineNo", "text")
 
-
-
 val tokenizer = new Tokenizer()
   .setInputCol("text")
   .setOutputCol("words")
@@ -80,37 +72,22 @@ val hashingTF = new HashingTF()
 val idf = new IDF().setInputCol("tf")
   .setOutputCol("tf_idf")
 
-
-
-
 val assembler = new VectorAssembler()
   .setInputCols(Array("tf_idf"))
   .setOutputCol("features")
 
-
-
 val pipeline = new Pipeline()
   .setStages(Array(tokenizer, hashingTF, idf,assembler))
 
-
-
 pipeline.getStages
-
-
 
 val result = pipeline.fit(df2).transform(df2).select("words","features").collect()
 
-
-
-
 result
-
-
 
 for( a <- result ){
          println( "Value of a: " + a(0),a(1) );
 }
-
 
 
 
