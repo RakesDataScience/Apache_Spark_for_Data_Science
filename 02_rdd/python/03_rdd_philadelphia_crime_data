@@ -1,13 +1,17 @@
 from collections import namedtuple
 from pprint import pprint
-base_rdd = sc.textFile("/mnt/learningspark//philadelphia-crime-data-2015-ytd.csv")
-base_rdd.count()
-base_rdd.take(5)
-no_header_rdd = base_rdd.filter(lambda line: 'DC_DIST' not in line)
+#Reading Data
+rdd = sc.textFile("/mnt/learningspark/philadelphia-crime-data-2015-ytd.csv")
+rdd.take(10)
+print "Count of lines: {0}".format(rdd.count())
+totalChars = rdd.map(lambda line: len(line)).reduce(lambda a, b: a + b)
+print "Count of characters : {0}".format(totalChars)
+#No Header
+no_header_rdd = rdd.filter(lambda line: 'DC_DIST' not in line)
 no_header_rdd.take(10)
-
 from collections import namedtuple
 CrimeData = namedtuple('CrimeData', ['date_string', 'time_string', 'offense', 'latitude', 'longitude'])
+
 def map_line(line):
   cols = line.split(",")
   return CrimeData(date_string=cols[10], time_string=cols[11], offense=cols[6], latitude=cols[7], longitude=cols[8])
@@ -16,10 +20,10 @@ data_rdd = no_header_rdd.map(map_line)
 
 print data_rdd.take(10)
 
-grouped_by_offense_rdd = data_rdd.groupBy(lambda data: data.offense)
-grouped_by_offense_rdd.map(lambda x : (x[0], list(x[1]))).collect
+data_rdd.map(lambda data: data.offense).distinct().collect()
 
-grouped_by_offense_rdd.keys().take(2)
+data_rdd.map(lambda data: data.offense).distinct().count()
+
 
 import re
 BAD_OFFENSE_RE = re.compile(r'^\d+$')
@@ -31,40 +35,47 @@ def clean_offense(d):
                 latitude=d.latitude,
                 longitude=d.longitude)
   return d
-
-
+  
 cleaned_rdd = data_rdd.map(clean_offense).filter(lambda d: BAD_OFFENSE_RE.search(d.offense) is None)
 
+cleaned_rdd.map(lambda data: data.offense).distinct().collect()
+cleaned_rdd.map(lambda data: data.offense).distinct().count()
 
+grouped_by_offense_rdd = cleaned_rdd.groupBy(lambda data: data.offense)
 
-grouped_by_offense_rdd2 = cleaned_rdd.groupBy(lambda data: data.offense)
+grouped_by_offense_rdd.map(lambda x : (x[0], list(x[1]))).take(2)
 
+grouped_by_offense_rdd.keys().take(2)
 
-offense_counts = grouped_by_offense_rdd2.map(lambda g: (g[0], len(g[1]))).collect()
+grouped_by_offense_rdd.values().map(lambda x : list(x)).take(1)
+
+offense_counts = grouped_by_offense_rdd.map(lambda g: (g[0], len(g[1]))).collect()
 
 for offense, count in offense_counts:
-  print "{0:30s} {1:d}".format(offense, count)
-
-grouped_by_offense_rdd.collectAsMap()
-
-
-print base_rdd.getNumPartitions()
-print grouped_by_offense_rdd2.getNumPartitions()
-
-print "Count of lines: {0}".format(base_rdd.count())
-totalChars = base_rdd.map(lambda line: len(line)).reduce(lambda a, b: a + b)
-print "Count of characters (Unicode): {0}".format(totalChars)
-
-cleaned_rdd.cache()
-
-result_rdd1 = cleaned_rdd.filter(lambda d: "homicide" in d.offense.lower()).map(lambda d: (d.offense, 1)).reduceByKey(lambda a, b: a + b)
-
-for method, count in result_rdd1.collect():
-  print "{0} {1:d}".format(method, count)
-
+  print offense,"and its count is =", count
+  
 from datetime import datetime
 date_format = "%Y-%m-%d"
 time_format = "%H:%M:%S"
+
+
+def parse_date_time(fmt, s, split_on=None):
+  if split_on:
+    s = s.split(split_on)[0]
+  try:
+    return datetime.strptime(s, fmt)
+  except:
+    return None
+    
+from decimal import Decimal
+
+def parse_lat_long(s):
+  try:
+    return Decimal(s)
+  except:
+    return None
+    
+    
 
 from pyspark.sql.types import *
 from decimal import Decimal
@@ -100,16 +111,29 @@ def clean_offense2(d):
                  latitude=d.latitude,
                  longitude=d.longitude)
   return d
+  
+  
+no_header_rdd.take(5)
+final_rdd = no_header_rdd.map(make_row).map(clean_offense2).filter(lambda d: BAD_OFFENSE_RE.search(d.offense) is None)
+final_rdd.take(5)
+final_rdd.map(lambda x :x.date).take(2)
+final_rdd.map(lambda x :(x.date).month).take(5)
 
-df = (no_header_rdd.map(make_row).
-      map(clean_offense2).
-      filter(lambda d: BAD_OFFENSE_RE.search(d.offense) is None).
-      toDF())
+month_rdd = final_rdd.groupBy(lambda data: (data.date).month)
+month_rdd_count = month_rdd.map(lambda g: (g[0], len(g[1]))).collect()
 
-from pyspark.sql.functions import *
- 
-df.filter(lower(df['offense']).like('%homicide%')).select(month(df['date']).alias("month"), df['offense']).groupBy('month').count()
+month_rdd_count
 
-df.select(month(df['date']).alias('month')).groupBy('month').count()
+month_offense = final_rdd.filter(lambda d: "homicide" in d.offense.lower()).map(lambda data: ((data.date).month,data.offense)).groupByKey()
+month_offense_count = month_offense.map(lambda g: (g[0], len(g[1]))).collect()
+month_offense_count
 
-df.select(hour(df["time"]).alias("hour"), df["offense"]).groupBy("hour").count()
+
+
+
+
+
+
+
+
+
