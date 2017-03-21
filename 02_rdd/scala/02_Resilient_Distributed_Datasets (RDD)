@@ -1,3 +1,4 @@
+//Creating RDD from textFile
 val spark_info_rdd = sc.textFile("/mnt/learningspark/spark_info.txt")
 
 spark_info_rdd.collect()
@@ -43,7 +44,5 @@ val productsByPopularity = sales_rdd.map{ case (user, product, price) => (produc
 _).collect().sortBy(-_._2)
 
 val mostPopular = productsByPopularity(0)
-
-
 
 
