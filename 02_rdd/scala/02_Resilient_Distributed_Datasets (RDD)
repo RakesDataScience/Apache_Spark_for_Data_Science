@@ -1,10 +1,11 @@
 //Creating RDD from textFile
 val spark_info_rdd = sc.textFile("/mnt/learningspark/spark_info.txt")
-
 spark_info_rdd.collect()
+// Count number of lines in file
 spark_info_rdd.count()
+// First line in file
 spark_info_rdd.first()
-
+// filter Spark in file
 spark_lines = spark_info_rdd.filter(lambda line : "Spark" in line)
 spark_lines.collect()
 val spark_lines = spark_info_rdd.filter(line => line.contains("Spark"))
@@ -17,32 +18,22 @@ map_words.collect()
 val flat_map_words = spark_info_rdd.flatMap(line => line.split(" "))
 flat_map_words.collect()
 val word_with_one = flat_map_words.map(word => (word,1))
-
 word_with_one.collect()
 val word_count = word_with_one.reduceByKey((x,y) => x + y)
-
 word_count.collect()
 
 
 val sales_rdd = sc.textFile("/mnt/learningspark/sales.txt").map(line=>line.split(",")).map(record =>(record(0), record(1), record(2)))
-
 sales_rdd.collect()
-
 val numPurchases = sales_rdd.count()
-
 numPurchases
 // let's count how many unique users made purchases
 val uniqueUsers = sales_rdd.map{ case (user, product, price) => user }.distinct().count()
-
 // let's sum up our total revenue
 val totalRevenue = sales_rdd.map{ case (user, product, price) => price.toDouble }.sum()
-
 // let's find our most popular product
-
 val productsByPopularity = sales_rdd.map{ case (user, product, price) => (product, 1) }.reduceByKey(_ +
 
 _).collect().sortBy(-_._2)
 
 val mostPopular = productsByPopularity(0)
-
-
