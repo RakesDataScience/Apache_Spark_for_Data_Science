@@ -128,7 +128,9 @@ month_offense = final_rdd.filter(lambda d: "homicide" in d.offense.lower()).map(
 month_offense_count = month_offense.map(lambda g: (g[0], len(g[1]))).collect()
 month_offense_count
 
-
+hour_offense = final_rdd.map(lambda data: ((data.time).hour,data.offense)).groupByKey()
+hour_offense_count = hour_offense.map(lambda g: (g[0], len(g[1]))).collect()
+hour_offense_count
 
 
 
