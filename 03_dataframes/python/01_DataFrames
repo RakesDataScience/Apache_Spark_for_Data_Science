@@ -1,3 +1,15 @@
+# Creating DataFrame using list of tuple.
+l = [('Alice', 1)]
+spark.createDataFrame(l).show()
+spark.createDataFrame(l, ['name', 'age']).show()
+
+# Creating DataFrame using list of tuple.
+rdd = sc.parallelize(l)
+spark.createDataFrame(rdd).show()
+df = spark.createDataFrame(rdd, ['name', 'age'])
+df.show()
+
+
 #Creating Data Frame from RDD.
 colors = ['white','green','yellow','red','brown','pink']
 color_df = sc.parallelize(colors).map(lambda x:(x,len(x))).toDF(['color','length'])
@@ -16,15 +28,11 @@ color_df.filter(color_df['length']>=4).sort('color',ascending=False).show()
 
 color_df.groupBy('length').count().show()
 
-# Creating DataFrame using list of tuple.
-l = [('Alice', 1)]
-spark.createDataFrame(l).show()
-spark.createDataFrame(l, ['name', 'age']).show()
+colors = ['white','green','yellow','red','brown','pink']
+color_rdd = sc.parallelize(colors).map(lambda x:(x,len(x)))
 
-# Creating DataFrame using list of tuple.
-rdd = sc.parallelize(l)
-spark.createDataFrame(rdd).show()
-df = spark.createDataFrame(rdd, ['name', 'age'])
+spark.createDataFrame(color_rdd).show()
+df = spark.createDataFrame(color_rdd, ['color','length'])
 df.show()
 
 #Create DataFrame from csv
