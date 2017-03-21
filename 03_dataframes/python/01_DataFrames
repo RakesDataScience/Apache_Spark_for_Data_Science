@@ -83,6 +83,10 @@ def expand_country_name(county):
 expand_country_name_udf = udf(expand_country_name, StringType())
 df_new = df.withColumn("Country", expand_country_name_udf(df.Country))
 
+#Creating Table from DF
+df_new.createOrReplaceTempView("people")
+val sqlDF = spark.sql("SELECT * FROM people")
+sqlDF.show()
 
 #Creating DataFrame from json file
 df = sqlContext.read.json('/mnt/learningspark/authors.json')
