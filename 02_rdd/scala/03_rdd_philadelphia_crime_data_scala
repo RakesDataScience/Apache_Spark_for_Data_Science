@@ -1,22 +1,7 @@
 val baseRDD = sc.textFile("/mnt/learningspark/philadelphia-crime-data-2015-ytd.csv")
-
-
-
-
 baseRDD.take(10).foreach(println)
-
-
-
-
 val noHeaderRDD = baseRDD.filter { line => ! (line contains "DC_DIST") }
-
-
-
-
 noHeaderRDD.take(10).foreach(println)
-
-
-
 
 case class CrimeData(dateString: String,
                      timeString: String,
@@ -31,32 +16,15 @@ val dataRDD = noHeaderRDD.map { line =>
             offense    = cols(6),  // TEXT_GENERAL_CODE
             latitude   = cols(7),  // POINT_X
             longitude  = cols(8))  // POINT_Y
-}.repartition(8)
-
-
-
+}
 
 dataRDD.take(10).foreach(println)
-
-
-
-
 val groupedByOffenseRDD = dataRDD.groupBy { data => data.offense }
-
-
-
-
 groupedByOffenseRDD.take(10)
-
-
-
-
 val offenseCounts = groupedByOffenseRDD.map { case (offense, items) => (offense, items.size) }.collect()
 for ((offense, count) <- offenseCounts) {
   println(s"$offense: $count")
 }
-
-
 
 val BadOffenseRE = """^\d+$""".r
 val cleanedRDD = dataRDD.map { data =>
@@ -66,63 +34,27 @@ filter { data =>
   BadOffenseRE.findFirstIn(data.offense).isEmpty
 }
 
-
-
-
 val offenseCounts = dataRDD.map(item => (item.offense, item)).countByKey()
 for ((offense, count) <- offenseCounts) {
   println(f"$offense%30s $count%5d")
 }
-
-
-
 val groupedByOffenseRDD2 = cleanedRDD.groupBy { data => data.offense }
-
-
-
-
 val offenseCounts = dataRDD.map(item => (item.offense, item)).countByKey()
 for ((offense, count) <- offenseCounts) {
   println(f"$offense%30s $count%5d")
 }
-
-
-
-
-groupedByOffenseRDD2.collectAsMap()
-
-
-
-
-println(baseRDD.partitions.length)
-println(groupedByOffenseRDD2.partitions.length)
-
-
-
 
 cleanedRDD.cache()
-
-
-
 val resultRDD1 = cleanedRDD.filter(_.offense.toLowerCase contains "homicide").map { item => (item.offense, 1) }.reduceByKey(_ + _)
 for ((method, count) <- resultRDD1.collect())
 println(f"$method%10s $count%d")
 
-
-
 cleanedRDD.map(_.dateString).take(30)
-
-
-
 
 import java.text.SimpleDateFormat
 
 val dateFmt = new SimpleDateFormat("yyyy-MM-dd")
 val timeFmt = new SimpleDateFormat("HH:mm:ss.S")
-
-
-
-
 
 import org.apache.spark.sql.types._
 import org.apache.spark.sql._
@@ -170,9 +102,6 @@ filter { data =>
 }.
 toDF
 
-
-
-
 df.printSchema()
 
 
@@ -181,8 +110,3 @@ import org.apache.spark.sql.functions._
 df.filter(lower($"offense") like "%homicide%").select(month($"date").as("month"), $"offense").groupBy($"month").count()
 df.select(month($"date").as("month")).groupBy("month").count()
 df.select(hour($"time").as("hour"), $"offense").groupBy($"hour").count()
-
-
-
-
-
