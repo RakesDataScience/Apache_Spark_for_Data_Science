@@ -1,1 +1,2 @@
-val iris_df = spark.read.csv('mnt/learningspark/iris.data.txt',inferSchema = True)
+val iris_df = spark.read.options(Map({"header"->"true"},{"inferSchema" -> "true"})).csv("mnt/learningspark/iris.data.txt")
+
