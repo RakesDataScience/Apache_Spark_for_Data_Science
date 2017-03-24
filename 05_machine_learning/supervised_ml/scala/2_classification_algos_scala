@@ -1,0 +1,37 @@
+val iris_df = spark.read.options(Map({"inferSchema" -> "true"})).csv("mnt/learningspark/iris.data.txt")
+iris_df.show()
+iris_df.dtypes
+iris_df.dtypes
+iris_df.count()
+iris_df.columns
+val df=iris_df.select($"_c0".alias("sepal_length_in_cm"),$"_c1".alias("sepal_width_in_cm"),$"_c2".alias("petal_length_in_cm"),$"_c3".alias("petal_width_in_cm"),$"_c4".alias("class"))
+df.columns
+df.select("class").distinct().show()
+val Array(trainingData, testData) = df.randomSplit(Array(0.8, 0.2))
+import org.apache.spark.ml.feature.VectorAssembler
+val features = df.drop("class")
+features.columns
+val vecAssembler  = new VectorAssembler().setInputCols(features.columns).setOutputCol("features")
+import org.apache.spark.ml.feature.StringIndexer
+val indexer = new StringIndexer()
+  .setInputCol("class")
+  .setOutputCol("classIndex")
+import org.apache.spark.ml.classification.{RandomForestClassificationModel, RandomForestClassifier}
+val rf = new RandomForestClassifier()
+  .setLabelCol("classIndex")
+  .setFeaturesCol("features")
+import org.apache.spark.ml.Pipeline
+val pipeline = new Pipeline()
+  .setStages(Array(vecAssembler, indexer, rf))
+val model = pipeline.fit(trainingData)
+val predictions = model.transform(testData)
+// Select example rows to display.
+predictions.columns
+predictions.select("prediction", "classIndex", "features").show(5)
+import org.apache.spark.ml.evaluation.MulticlassClassificationEvaluator
+val evaluator = new MulticlassClassificationEvaluator()
+  .setLabelCol("classIndex")
+  .setPredictionCol("prediction")
+  .setMetricName("accuracy")
+val accuracy = evaluator.evaluate(predictions)
+println("Test Error = " + (1.0 - accuracy))
