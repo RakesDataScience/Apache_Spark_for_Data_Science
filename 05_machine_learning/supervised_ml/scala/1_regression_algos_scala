@@ -1,0 +1,1 @@
+val sales = spark.read.options(Map({"sep" -> "\t"},{"header" -> "True"})).csv("mnt/learningspark/home_data.csv")
