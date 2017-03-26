@@ -1,0 +1,32 @@
+#Install Java
+sudo add-apt-repository ppa:webupd8team/java -y
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+
+#Check Java -version
+java -version
+#Create directory work
+mkdir work 
+cd work
+#Download Apache Spark tar file
+wget http://redrockdigimark.com/apachemirror/spark/spark-2.1.0/spark-2.1.0-bin-hadoop2.7.tgz 
+
+#unzip the file
+tar -xzvf spark-2.1.0-bin-hadoop2.7.tgz
+
+Rename 
+mv spark-2.1.0-bin-hadoop2.7 spark
+
+#Set the path
+vi ~/.bashrc
+export SPARK_HOME=/home/ubuntu/work/spark
+export PATH=$PATH:$SPARK_HOME/bin
+
+#Compile the changes
+source ~/.bashrc
+
+#Start pyspark(Spark with python)
+pyspark
+
+#Start spark-shell (Spark with Scala)
+spark-shell
