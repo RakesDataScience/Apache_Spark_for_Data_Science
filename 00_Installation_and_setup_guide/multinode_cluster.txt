@@ -1,0 +1,59 @@
+create 4 linux small instances aws instances and  allow all traffic
+
+chmod 600 cluster_setup.pem
+
+Install Java
+
+sudo add-apt-repository ppa:webupd8team/java -y
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+
+Install Python
+
+wget http://repo.continuum.io/archive/Anaconda3-4.0.0-Linux-x86_64.sh
+
+vi ~/.ssh/config
+
+Host master
+  HostName ec2-54-174-165-128.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/cluster_setup.pem
+Host slave1
+  HostName ec2-52-87-151-234.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/cluster_setup.pem
+Host slave2
+  HostName ec2-54-146-156-160.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/cluster_setup.pem
+Host slave2
+  HostName ec2-54-146-156-160.compute-1.amazonaws.com
+  User ubuntu
+  IdentityFile ~/.ssh/cluster_setup.pem
+
+
+master
+ssh-keygen -f ~/.ssh/id_rsa -t rsa -P ""
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+cat ~/.ssh/id_rsa.pub | ssh slave1 'cat >> ~/.ssh/authorized_keys'
+cat ~/.ssh/id_rsa.pub | ssh slave2 'cat >> ~/.ssh/authorized_keys'
+
+wget http://www-eu.apache.org/dist/spark/spark-2.0.2/spark-2.0.2-bin-hadoop2.7.tgz 
+
+vi ~/.bashrc
+
+export SPARK_HOME=/home/ubuntu/spark
+export PATH=$PATH:$SPARK_HOME/bin
+source ~/.bashrc
+
+master
+./start-all.sh
+http://54.174.165.128:8080/
+
+pyspark --master spark://ip-172-31-0-70.ec2.internal:7077
+spark-shell --master spark://ip-172-31-0-70.ec2.internal:7077
+http://54.174.165.128:4040/jobs/
+
+
+
