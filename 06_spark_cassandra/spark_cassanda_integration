@@ -1,0 +1,46 @@
+Installion of Cassandra
+
+Go to 
+https://academy.datastax.com/planet-cassandra/cassandra
+
+Download DataStax Community Edition v2.1.15 (Changelog)
+
+Create table
+
+CREATE KEYSPACE spark WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+CREATE TABLE spark.try (spark float PRIMARY KEY ,connector float) ;
+INSERT INTO spark.try (spark, connector ) VALUES ( 2.0,2.0);
+SELECT * FROM spark.try ;
+
+
+SparkApp_setup
+Sbt file
+
+name := "spark_cassandra_learning"
+version := "1.0"
+scalaVersion := "2.10.4"
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "2.0.2",
+  "org.apache.spark" %% "spark-sql" % "2.0.2",
+  "com.datastax.spark" % "spark-cassandra-connector_2.10" % "2.0.0-M3")
+
+Scala Object
+
+
+import com.datastax.spark.connector._
+import org.apache.spark.{SparkConf, SparkContext}
+object SimpleApp {
+  def main(args: Array[String]) {
+    //val conf = new SparkConf(true)
+    val conf = new SparkConf(true)
+      .set("spark.cassandra.connection.host", "127.0.0.1")
+      //.set("spark.cleaner.ttl", SparkCleanerTtl.toString)
+      .setMaster("local[*]")
+      .setAppName("cassandra")
+    val sc = new SparkContext(conf)
+    val rdd = sc.cassandraTable("spark", "try")
+    val file_collect=rdd.collect()
+
+    file_collect.map(println(_))
+  }
+}
