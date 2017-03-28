@@ -1,0 +1,6 @@
+Apache Spark is an open source Big Data analytical framework.
+RDD is the main abstraction in Apache Spark
+Apache Spark can also be called as an unified engine.
+Scala is programming and functional language.
+Apache Spark is developed by using Scala programming language.
+Lets start learning Apache Spark and become Data Scientist in Big Data Space.
