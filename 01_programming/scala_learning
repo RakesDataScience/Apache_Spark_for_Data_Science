@@ -1,28 +1,27 @@
+//Getting started with Scala
 println("Hello World!")
 
+//Creating Some Variables in Scala
 var i = 4
 i.getClass
-
 var f = 4.1
 f.getClass
-
 var b = true
 var s = "This is a string!"
-//val and var Difference
 
+//val and var Difference
 val a = 10
 a = 20
 var b = 50
 b = 80
-
 println(s)
+
 //List Creation
 val my_list =List()
 var my_list = List(1, 2, 3)
 println(my_list)
 
 //For loop
-
 for(i <- my_list){
        println(i);
       }
@@ -55,7 +54,6 @@ my_set = Set(1,2,3,4,3,2)
 println(my_set)
 
 //map Creation
-
 var my_map = Map()
 var my_map = Map(1 -> "apple", 2->"ball")
 for ((k,v) <- my_map) printf("key= %s, value= %s\n", k, v)
@@ -124,7 +122,3 @@ class Arithmetic_operations() {
 var obj1 =new Arithmetic_operations() 
 obj1.addition(10,20)
 obj1.sub(40,20)
-
-
-
-
