@@ -60,6 +60,7 @@ for key, value in my_dict.iteritems():
 my_dict = {'name': 'John', 1: [2, 4, 3]}
 print my_dict
 
+# if Condition.
 num = 3
 if num > 0:
     print(num, "is a positive number.")
@@ -70,10 +71,15 @@ if num > 0:
 
 # num = -5
 # num = 0
+
+# if-Else Condition.
+
 if num >= 0:
     print("Positive or Zero")
 else:
     print("Negative number")
+
+# if-elif-else Condition.
 
 if num > 0:
     print("Positive number")
@@ -82,6 +88,7 @@ elif num == 0:
 else:
     print("Negative number")
 
+#Function
 
 def addition(x):
     y = x + 2
@@ -89,8 +96,12 @@ def addition(x):
 i = 5
 addition(i)
 
+#Lambda Function
+
 square = lambda x: x*x
 square(2)
+
+#Class
 
 class Arithmetic_operations:       
    
@@ -100,7 +111,7 @@ class Arithmetic_operations:
   def sub(self,a,b):
       print 'sub method',a-b
       
-
+#Object Creation
 obj1 =Arithmetic_operations()
 obj1.addition(10,20)
 obj1.sub(40,20)
