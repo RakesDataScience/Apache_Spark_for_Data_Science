@@ -27,16 +27,19 @@ for(i <- my_list){
       }
 var my_list = List(1, "Hello", 3.4)
 println(my_list)
-var my_list = ("mouse", List(8, 4, 6), List('a'))
-println(my_list)
 
 var my_list = List('p','r','o','b','e')
 println(my_list)
 println(my_list(0))
 println(my_list(2))
 
-//Set Creation
+var my_list = ("mouse", List(8, 4, 6), List('a'))
+println(my_list)
+my_list._1
+my_list._1(0)
+my_list._2(1)
 
+//Set Creation
 var a = Set()
 var my_set = Set(1, 2, 3)
 println(my_set)
