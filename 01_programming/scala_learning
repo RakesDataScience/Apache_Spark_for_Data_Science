@@ -33,7 +33,7 @@ println(my_list)
 println(my_list(0))
 println(my_list(2))
 
-var my_list = List("mouse", List(8, 4, 6), List('a'))
+var my_list = ("mouse", List(8, 4, 6), List('a'))
 println(my_list)
 my_list._1
 my_list._1(0)
