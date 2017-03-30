@@ -1,5 +1,6 @@
 #Getting started with Python
 print 'Hello World!'
+
 #Create some variables in Python
 i = 4  #int
 type(i)
@@ -8,6 +9,8 @@ type(f)
 b = True  #boolean variable
 s = "This is a string!"
 print s
+
+#Empty list
 my_list = []
 # list of integers
 my_list = [1, 2, 3]
@@ -15,33 +18,25 @@ print my_list
 for i in my_list:
     addition = i+i
     print addition
-
 # list with mixed datatypes
 my_list = [1, "Hello", 3.4]
 print my_list
-
 my_list = ["mouse", [8, 4, 6], ['a']]
 print my_list
-
 my_list = ['p','r','o','b','e']
-
 print(my_list[0])
 print(my_list[2])
 
 # empty set()
 a = set()
-
 # set of integers
 my_set = {1, 2, 3}
 print(my_set)
-
 for s in my_set:
     print s
-
 # set of mixed datatypes
 my_set = {1.0, "Hello", (1, 2, 3)}
 print(my_set)
-
 # set do not have duplicates
 # Output: {1, 2, 3, 4}
 my_set = {1,2,3,4,3,2}
@@ -51,8 +46,6 @@ print(my_set)
 my_dict = {}
 # dictionary with integer keys
 my_dict = {1: 'apple', 2: 'ball'}
-
-
 for key, value in my_dict.iteritems():
     print "key =",key,"value =",value
 
@@ -73,14 +66,12 @@ if num > 0:
 # num = 0
 
 # if-Else Condition.
-
 if num >= 0:
     print("Positive or Zero")
 else:
     print("Negative number")
 
 # if-elif-else Condition.
-
 if num > 0:
     print("Positive number")
 elif num == 0:
@@ -89,7 +80,6 @@ else:
     print("Negative number")
 
 #Function
-
 def addition(x):
     y = x + 2
     return y
@@ -97,14 +87,12 @@ i = 5
 addition(i)
 
 #Lambda Function
-
 square = lambda x: x*x
 square(2)
 
 #Class
-
 class Arithmetic_operations:       
-   
+
   def addition(self,a,b):
       print 'additon method',a+b
    
