@@ -33,7 +33,7 @@ println(my_list)
 println(my_list(0))
 println(my_list(2))
 
-var my_list = ("mouse", List(8, 4, 6), List('a'))
+var my_list = List("mouse", List(8, 4, 6), List('a'))
 println(my_list)
 my_list._1
 my_list._1(0)
@@ -45,8 +45,7 @@ var my_set = Set(1, 2, 3)
 println(my_set)
 
 //For loop
-
-for s <-  my_set{
+for (s <-  my_set) {
     println(s)
 }
 
@@ -65,22 +64,19 @@ println(my_dict)
 
 //if condition
 var num = 3
-if( num >0  ){
-         println(num,"is a positive number.");}
+if( num >0 ) {
+         println(num,"is a positive number.");
+         }
 
 var num = -1
 if (num > 0){
-    println(num, "is a positive number.")}
+    println(num, "is a positive number.")
+    }
 
 var num = -5
 //var num = 0
 
 //if - else condition
-
-if num >= 0{
-    println("Positive or Zero")
-else:
-    print("Negative number")
 
 var num = 0
 //var num = -5
@@ -92,12 +88,20 @@ if( num >= 0 ){
 //if - else condition
 
 if( num >10 ){
-println("Positive numbe");} 
-else if( num == 0 ){
-println("Zero");} 
-else{
+println("Positive numbe");} else if( num == 0 ){
+println("Zero");} else{
 println("Negative number");}
 
+var x = 30;
+if( x == 10 ){
+         println("Value of X is 10");
+      } else if( x == 20 ){
+         println("Value of X is 20");
+      } else if( x == 30 ){
+         println("Value of X is 30");
+      } else{
+         println("This is else statement");
+      }
 
 //Functions
 
