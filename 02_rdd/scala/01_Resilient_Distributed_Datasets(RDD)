@@ -1,6 +1,8 @@
 //SparkContext object
+
 sc
 //SparkSession object
+
 spark
 
 //Rdd Creation
@@ -21,27 +23,27 @@ val rdd_a = sc.parallelize(1 to 10, 3)
 val rdd_b = rdd_a.filter(_ % 3 == 0)
 rdd_b.collect()
 
-//Distinct Transformatio
+//Distinct Transformation
 
 val rdd_c = sc.parallelize(List("John", "Jack", "Mike", "Jack"))
 val dist_rdd = rdd_c.distinct()
 dist_rdd.collect()
 
-//Intersection Transformatio
+//Intersection Transformation
 
 val rdd_x = sc.parallelize(1 to 10)
 val rdd_y = sc.parallelize(5 to 15)
 val rdd_z = rdd_x.intersection(rdd_y)
 rdd_z.collect
 
-//Union Transformatio
+//Union Transformation
 
 val rdd_a = sc.parallelize(3 to 7, 1)
 val rdd_b = sc.parallelize(7 to 9, 1)
 val rdd_c = rdd_a.union(rdd_b)
 rdd_c.collect()
 
-//map Transformatio
+//map Transformation
 
 val rdd_a = sc.parallelize(List("animal", "human", "bird", "rat"), 3)
 //val rdd_b = rdd_a.map(x =>x.length)
@@ -62,18 +64,19 @@ sc.parallelize(List(5, 10, 20), 2).map(x => List(x, x, x)).collect
 sc.parallelize(List(5, 10, 20), 2).flatMap(x => List(x, x, x)).collect
 
 //keys
+
 val rdd_a = sc.parallelize(List("black", "blue", "white", "green", "grey"), 2)
 val rdd_b = rdd_a.map(x => (x.length, x))
 rdd_b.keys.collect
 
-//cartesian Transformatio
+//cartesian Transformation
 
 val rdd_x = sc.parallelize(List(1,2,3))
 val rdd_y = sc.parallelize(List(10,11,12))
 rdd_x.cartesian(rdd_y).collect
 
 
-// groupByKey Transformatio
+// groupByKey Transformation
 
 val rdd_a = sc.parallelize(List("black", "blue", "white", "green", "grey"), 2)
 //val rdd_b = rdd_a.keyBy(x => x.length)
@@ -81,7 +84,7 @@ val rdd_b = rdd_a.keyBy(_.length)
 rdd_b.collect()
 rdd_b.groupByKey.collect
 
-//join Transformatio
+//join Transformation
 
 val rdd_a = sc.parallelize(List("blue", "green", "orange"), 3)
 //val rdd_b = rdd_a.keyBy(x => x.length)
@@ -98,7 +101,8 @@ rdd_b.leftOuterJoin(rdd_d).collect()
 rdd_b.rightOuterJoin(rdd_d).collect()
 rdd_b.fullOuterJoin(rdd_d).collect()
 
-//reduceByKey Transformatio
+//reduceByKey Transformation
+
 val rdd_a = sc.parallelize(List("black", "blue", "white", "green", "grey"), 2)
 val rdd_b = rdd_a.map(x => (x.length, x))
 rdd_b.collect()
