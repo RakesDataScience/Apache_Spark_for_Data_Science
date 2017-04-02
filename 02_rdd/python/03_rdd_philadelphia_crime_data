@@ -67,15 +67,6 @@ def parse_date_time(fmt, s, split_on=None):
   except:
     return None
     
-from decimal import Decimal
-
-def parse_lat_long(s):
-  try:
-    return Decimal(s)
-  except:
-    return None
-    
-    
 
 from pyspark.sql.types import *
 from decimal import Decimal
@@ -114,6 +105,7 @@ def clean_offense2(d):
   
   
 no_header_rdd.take(5)
+
 final_rdd = no_header_rdd.map(make_row).map(clean_offense2).filter(lambda d: BAD_OFFENSE_RE.search(d.offense) is None)
 final_rdd.take(5)
 final_rdd.map(lambda x :x.date).take(2)
@@ -131,11 +123,3 @@ month_offense_count
 hour_offense = final_rdd.map(lambda data: ((data.time).hour,data.offense)).groupByKey()
 hour_offense_count = hour_offense.map(lambda g: (g[0], len(g[1]))).collect()
 hour_offense_count
-
-
-
-
-
-
-
-
