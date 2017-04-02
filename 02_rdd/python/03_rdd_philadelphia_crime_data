@@ -58,9 +58,6 @@ from datetime import datetime
 date_format = "%Y-%m-%d"
 time_format = "%H:%M:%S"
 
-from pyspark.sql.types import *
-from decimal import Decimal
-
 CrimeData2 = namedtuple('CrimeData2', ['date', 'time', 'offense', 'latitude', 'longitude'])
 
 def parse_date_time(fmt, s, split_on=None):
