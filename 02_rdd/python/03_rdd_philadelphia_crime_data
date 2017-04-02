@@ -80,20 +80,14 @@ def parse_date_time(fmt, s, split_on=None):
     return datetime.strptime(s, fmt)
   except:
     return None
-  
-def parse_lat_long(s):
-  try:
-    return Decimal(s)
-  except:
-    return None
-  
+
 def make_row(line):
   cols = line.split(",")
   return CrimeData2(date      = parse_date_time(date_format, cols[10]),
                     time      = parse_date_time(time_format, cols[11], split_on="."),
                     offense   = cols[6],
-                    latitude  = parse_lat_long(cols[7]),
-                    longitude = parse_lat_long(cols[8]))
+                    latitude  = cols[7],
+                    longitude = cols[8])
 
 def clean_offense2(d):
   d = CrimeData2(date=d.date, 
