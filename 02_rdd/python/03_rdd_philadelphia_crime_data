@@ -58,16 +58,6 @@ from datetime import datetime
 date_format = "%Y-%m-%d"
 time_format = "%H:%M:%S"
 
-
-def parse_date_time(fmt, s, split_on=None):
-  if split_on:
-    s = s.split(split_on)[0]
-  try:
-    return datetime.strptime(s, fmt)
-  except:
-    return None
-    
-
 from pyspark.sql.types import *
 from decimal import Decimal
 
