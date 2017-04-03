@@ -3,7 +3,7 @@ size=2*1000*1000
 m=list(xrange(size))
 m
 
-len(variable)
+len(m)
 import sys
 print sys.getsizeof(m) / 1000 / 1000, "Megabytes"
 rdd=sc.parallelize([1,2,3,4,5], numSlices=5)
@@ -11,8 +11,8 @@ rdd.collect()
 print rdd.getNumPartitions(), "partitions"
 
 for i in range(5):
-  rdd.map(lambda x: len(dataSet) * x).collect()
+  rdd.map(lambda x: len(m) * x).collect()
 
-broadcastVar=sc.broadcast(dataSet)
+broadcastVar=sc.broadcast(m)
 for i in range(5):
   rdd.map(lambda x: len(broadcastVar.value)).collect()
