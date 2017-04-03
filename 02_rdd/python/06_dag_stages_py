@@ -1,34 +1,29 @@
-wordList = ["doug", "jon", "sameer", "eliano", "richard"]
-
-wordsRDD = sc.parallelize(wordList, 4)
-
-wordsRDD.collect()
-
-datapath = "mnt/learningspark/tom_sawyer.txt"
+datapath = "mnt/learningspark/spark_info.txt"
 
 sc.textFile(datapath, 2).collect()
 
-ebook = sc.textFile(datapath, 2).collect()
+spark_info_rdd = sc.textFile(datapath, 4)
 
-ebookRDD = sc.textFile(datapath, 2)
+spark_info_rdd.count()
 
-ebookRDD.count()
+spark_info_rdd.getNumPartitions()
 
-ebookRDD.getNumPartitions()
-
-print 'type of ebookRDD: {0}'.format(type(ebookRDD))
-
+print 'type of spark_info_rdd: {0}'.format(type(spark_info_rdd))
 
 glomDemo = sc.parallelize([1,2,3,4,5,6,7,8,9], 3)
+
 glomDemo.glom().collect()
 
 for (p, i) in glomDemo.glom().zipWithIndex().collect():
   print '%d: %s items(s)' % (i, p)
+  
 
-for (p, i) in ebookRDD.glom().zipWithIndex().collect():
-  print '%d: %d items(s)' % (i, len(p))
+for (p, i) in spark_info_rdd.glom().zipWithIndex().collect():
+  print '%d: %s items(s)' % (i, p)
 
-sc.textFile(datapath, 2).flatMap(lambda x: x.split(' ')).collect()
+sc.textFile(datapath, 4).flatMap(lambda x: x.split(' ')).collect()
 
 sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).collect()
+
 sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).reduceByKey(lambda x, y: x + y).collect()
+
