@@ -1,89 +1,13 @@
-
-val broadcastVar = sc.broadcast(1 to 3)
-
-println(s"Driver: " + broadcastVar.value)
-
-val results = sc.parallelize(1 to 5, numSlices=5).map { n => s"Task $n: " + broadcastVar.value }.collect()
-println(results.mkString("\n"))
-broadcastVar.unpersist
-
-broadcastVar.destroy
-
-broadcastVar.value
-
-
-
-// Create a medium sized dataSet of several million values.
 val size = 60*1000*1000
-var dataSet = (1 to size).toArray
-
-
-
-// Ceate an RDD with 5 partitions so that we can do an operation in 25 separate tasks running in parallel on up to 5 different executors.
+var m = (1 to size).toArray
 
 val rdd = sc.parallelize(1 to 5, numSlices=5)
 println(s"${rdd.partitions.length} partitions")
 
-
-
 // In a loop, do a job 5 times without using broadcast variables...
-
-for (i <- 1 to 5) rdd.map { x => dataSet.length * x }.collect()
-
-
-
-
+for (i <- 1 to 5) rdd.map { x => m.length * x }.collect()
 
 // Create a broadcast variable.  This will transmit the dataset to the executors.
-val broadcastVar = sc.broadcast(dataSet)
-
-
-
-
+val broadcastVar = sc.broadcast(m)
 
 for (i <- 1 to 5) rdd.map { x => broadcastVar.value.length * x }.collect()
-
-
-
-
-
-
-  var broadcastVar2 = broadcastVar
-  for (i <- 1 to 5) rdd.map { x => broadcastVar2.value.length * x }.collect()
-
-
-
-
-
-// Free up the memory on the executors.
-broadcastVar.unpersist()
-
-
-
-val df1 = sqlContext.range(100)
-val df2 = sqlContext.range(100)
-
-df1.join(df2, df1("id") === df2("id")).collect
-
-
-
-
-df1.show()
-
-
-
-import org.apache.spark.sql.functions._
-
-df1.join(broadcast(df2), df1("id") === df2("id")).collect
-
-
-
-df2.cache.count
-df1.join(df2, df1("id") === df2("id")).collect
-
-
-
-
-
-
-
