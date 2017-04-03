@@ -1,73 +1,33 @@
 val wordList = Array("cat", "cat", "fish", "dog", "fish")
-
-
-
-
 val wordsRDD = sc.parallelize(wordList, 1)
-
-
-
-
 wordsRDD.count()
-
-
-
-
 wordsRDD.partitions.length
-
-
-
 wordsRDD.collect()
-
-
-
 
 val wordsRDDWith2Partitions = sc.parallelize(wordList, 2)
 
-
-
-
 wordsRDDWith2Partitions.collect()
 
-
-
+wordsRDD.partitions.length
 
 for (p <- wordsRDDWith2Partitions.glom.collect())
   println(p.toSeq)
 
+val datapath = "mnt/learningspark/spark_info.txt"
+val spark_infoRDD = sc.textFile(datapath, 4)
 
+spark_infoRDD.count()
 
+spark_infoRDD.partitions.length
 
-val ebookRDD = sc.textFile("mnt/learningspark/tom_sawyer.txt", 2)
+spark_infoRDD.getClass
 
-
-
-
-ebookRDD.count()
-
-
-
-
-ebookRDD.partitions.length
-
-
-
-
-ebookRDD.getClass
-
-
-
-for ((p, i) <- ebookRDD.glom.collect().zipWithIndex)
+for ((p, i) <- spark_infoRDD.glom.collect().zipWithIndex)
   println(s"$i: ${p.length} item(s)")
 
+sc.textFile(datapath, 4).flatMap(line => line.split(" ")).collect()
 
-
-sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).collect()
-
-
-
-
-sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).map(word => (word, 1)).collect()
+sc.textFile(datapath, 4).flatMap(line => line.split(" ")).map(word => (word, 1)).collect()
 
 
 
