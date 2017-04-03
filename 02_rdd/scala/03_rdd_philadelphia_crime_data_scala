@@ -1,14 +1,10 @@
 val baseRDD = sc.textFile("/mnt/learningspark/philadelphia-crime-data-2015-ytd.csv")
-baseRDD.take(10).foreach(println)
 val noHeaderRDD = baseRDD.filter { line => ! (line contains "DC_DIST") }
-noHeaderRDD.take(10).foreach(println)
-
 case class CrimeData(dateString: String,
                      timeString: String,
                      offense: String,
                      latitude: String,
                      longitude: String)
-
 val dataRDD = noHeaderRDD.map { line =>
   val cols = line.split(",")
   CrimeData(dateString = cols(10), // DISPATCH_DATE
@@ -17,15 +13,14 @@ val dataRDD = noHeaderRDD.map { line =>
             latitude   = cols(7),  // POINT_X
             longitude  = cols(8))  // POINT_Y
 }
-
 dataRDD.take(10).foreach(println)
 val groupedByOffenseRDD = dataRDD.groupBy { data => data.offense }
+groupedByOffenseRDD.take(10)
 groupedByOffenseRDD.take(10)
 val offenseCounts = groupedByOffenseRDD.map { case (offense, items) => (offense, items.size) }.collect()
 for ((offense, count) <- offenseCounts) {
   println(s"$offense: $count")
 }
-
 val BadOffenseRE = """^\d+$""".r
 val cleanedRDD = dataRDD.map { data =>
   data.copy(offense = data.offense.replaceAll("\"", "").trim())
@@ -33,48 +28,22 @@ val cleanedRDD = dataRDD.map { data =>
 filter { data =>
   BadOffenseRE.findFirstIn(data.offense).isEmpty
 }
-
-val offenseCounts = dataRDD.map(item => (item.offense, item)).countByKey()
-for ((offense, count) <- offenseCounts) {
-  println(f"$offense%30s $count%5d")
-}
 val groupedByOffenseRDD2 = cleanedRDD.groupBy { data => data.offense }
-val offenseCounts = dataRDD.map(item => (item.offense, item)).countByKey()
-for ((offense, count) <- offenseCounts) {
-  println(f"$offense%30s $count%5d")
+val offenseCounts_2 = groupedByOffenseRDD2.map { case (offense, items) => (offense, items.size) }.collect()
+for ((offense, count) <- offenseCounts_2) {
+  println(s"$offense: $count")
 }
-
-cleanedRDD.cache()
 val resultRDD1 = cleanedRDD.filter(_.offense.toLowerCase contains "homicide").map { item => (item.offense, 1) }.reduceByKey(_ + _)
 for ((method, count) <- resultRDD1.collect())
 println(f"$method%10s $count%d")
-
 cleanedRDD.map(_.dateString).take(30)
-
 import java.text.SimpleDateFormat
-
 val dateFmt = new SimpleDateFormat("yyyy-MM-dd")
 val timeFmt = new SimpleDateFormat("HH:mm:ss.S")
-
 import org.apache.spark.sql.types._
 import org.apache.spark.sql._
 import sqlContext.implicits._
 import java.sql.Timestamp
-
-case class CrimeData2(date:      Option[Timestamp],
-                      time:      Option[Timestamp],
-                      offense:   String,
-                      latitude:  Option[BigDecimal],
-                      longitude: Option[BigDecimal])
-def parseLatLong(s: String) = {
-  try {
-    Some(BigDecimal(s))
-  }
-  catch {
-    case _: Exception => None
-  }
-}
-
 def parseDateTime(fmt: SimpleDateFormat, s: String) = {
   try {
     Some(new Timestamp(fmt.parse(s).getTime))
@@ -83,7 +52,11 @@ def parseDateTime(fmt: SimpleDateFormat, s: String) = {
     case _: Exception => None
   }
 }
-
+case class CrimeData2(date:      Option[Timestamp],
+                      time:      Option[Timestamp],
+                      offense:   String,
+                      latitude:  String,
+                      longitude: String)
 val df = noHeaderRDD.map { line =>
   val cols = line.split(",")
   val timeString = cols(11)
@@ -91,8 +64,8 @@ val df = noHeaderRDD.map { line =>
   CrimeData2(parseDateTime(dateFmt, dateString),
              parseDateTime(timeFmt, timeString),
              cols(6), 
-             parseLatLong(cols(7)),
-             parseLatLong(cols(8)))
+             cols(7),
+             cols(8))
 }.
 map { data =>
   data.copy(offense = data.offense.replaceAll("\"", "").trim())
@@ -101,12 +74,8 @@ filter { data =>
   BadOffenseRE.findFirstIn(data.offense).isEmpty
 }.
 toDF
-
 df.printSchema()
-
-
 import org.apache.spark.sql.functions._
- 
-df.filter(lower($"offense") like "%homicide%").select(month($"date").as("month"), $"offense").groupBy($"month").count()
-df.select(month($"date").as("month")).groupBy("month").count()
-df.select(hour($"time").as("hour"), $"offense").groupBy($"hour").count()
+df.filter(lower($"offense") like "%homicide%").select(month($"date").as("month"), $"offense").groupBy($"month").count().show()
+df.select(month($"date").as("month")).groupBy("month").count().show()
+df.select(hour($"time").as("hour"), $"offense").groupBy($"hour").count().show()
