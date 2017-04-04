@@ -23,7 +23,19 @@ for (p, i) in spark_info_rdd.glom().zipWithIndex().collect():
 
 sc.textFile(datapath, 4).flatMap(lambda x: x.split(' ')).collect()
 
-sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).collect()
+rdd = sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).collect()
 
-sc.textFile(datapath).flatMap(lambda x: x.split(' ')).map(lambda s: (s, 1)).reduceByKey(lambda x, y: x + y).collect()
+rdd = sc.textFile(datapath)
+words = rdd.flatMap(lambda x: x.split(' '))
+work_1 = words.map(lambda s: (s, 1))
+word_count = work_1.reduceByKey(lambda x, y: x + y)
 
+word_count.collect()
+word_count.count()
+word_count.cache()
+word_count.count()
+word_count.take(2)
+work_1.cache()
+word_count.cache()
+word_count.count()
+word_count.take(2)
