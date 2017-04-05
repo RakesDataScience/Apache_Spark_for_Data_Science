@@ -29,5 +29,16 @@ sc.textFile(datapath, 4).flatMap(line => line.split(" ")).collect()
 
 sc.textFile(datapath, 4).flatMap(line => line.split(" ")).map(word => (word, 1)).collect()
 
-sc.textFile("mnt/learningspark/tom_sawyer.txt", 2).flatMap(line => line.split(" ")).map(word => (word, 1)).reduceByKey((x, y) => x + y).collect()
+rdd = sc.textFile(datapath, 4)
+words = rdd.flatMap(flatMap(line => line.split(" "))
+words_1 = words.map(word => (word, 1))
+words_count = words_1.reduceByKey((x, y) => x + y)
+
+words_count.collect()
+words_count.count()
+words_count.take(2)
+words_count.cache()
+words_count.collect()
+words_count.count()
+words_count.take(2)
 
