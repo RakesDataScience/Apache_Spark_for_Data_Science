@@ -5,9 +5,15 @@ val rdd = sc.parallelize(1 to 5, numSlices=5)
 println(s"${rdd.partitions.length} partitions")
 
 // In a loop, do a job 5 times without using broadcast variables...
-for (i <- 1 to 5) rdd.map { x => m.length * x }.collect()
-
+for (i <- 1 to 5) { 
+  val result = rdd.map { x => m.length * x }
+  result.collect().foreach(println)  
+}
 // Create a broadcast variable.  This will transmit the dataset to the executors.
+
 val broadcastVar = sc.broadcast(m)
 
-for (i <- 1 to 5) rdd.map { x => broadcastVar.value.length * x }.collect()
+for (i <- 1 to 5) {
+  val result = rdd.map { x => broadcastVar.value.length * x }
+  result.collect().foreach(println) 
+}
