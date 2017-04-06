@@ -3,7 +3,8 @@ l = [('Alice', 1)]
 spark.createDataFrame(l).show()
 spark.createDataFrame(l, ['name', 'age']).show()
 
-# Creating DataFrame using list of tuple.
+#Creating Data Frame from RDD.
+
 rdd = sc.parallelize(l)
 spark.createDataFrame(rdd).show()
 df = spark.createDataFrame(rdd, ['name', 'age'])
@@ -17,7 +18,6 @@ color_df
 color_df.dtypes
 color_df.show()
 
-Drop a column
 color_df.drop('length').show()
 color_df.filter(color_df.length.between(4,5)).select(color_df.color.alias('mid_length')).show()
 
@@ -51,6 +51,7 @@ df.select(df['First Name']).show()
 
 df.filter(df['age'] >= 24).show()
 df.groupBy("age").count().show()
+
 from pyspark.sql.functions import concat_ws, coalesce, lit, trim
 
 def combine(*cols):
