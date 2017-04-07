@@ -14,8 +14,8 @@ sentenceDataFrame = spark.createDataFrame([
 tokenizer = Tokenizer(inputCol="sentence", outputCol="words")
 
 tokenized = tokenizer.transform(sentenceDataFrame)
-tokenized.select("sentence", "words")\
-    .withColumn("tokens", countTokens(col("words"))).show(truncate=False)
+
+tokenized.select("sentence", "words").show(truncate=False)
 
 from pyspark.ml.feature import RegexTokenizer
 date_pattern = "\\d{1,4}[/ -]\\d{1,4}[/ -]\\d{1,4}"
