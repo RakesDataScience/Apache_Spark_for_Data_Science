@@ -1,0 +1,9 @@
+
+#Download Spark-streaming-kafka
+
+http://search.maven.org/#search|ga|1|a%3A%22spark-streaming-kafka-0-8-assembly_2.11%22%20AND%20v%3A%222.1.0%22
+
+#Add to class path and submit to class path. Spark-streaming-kafka
+
+bin/spark-submit --jars /home/ubuntu/spark-streaming-kafka-0-8-assembly_2.11-2.1.0.jar examples/src/main/python/streaming/kafka_wordcount.py localhost:2181 test
+
