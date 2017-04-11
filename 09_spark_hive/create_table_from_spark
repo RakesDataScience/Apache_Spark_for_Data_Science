@@ -1,0 +1,8 @@
+from pyspark.sql import HiveContext
+sqlContext = HiveContext(sc)
+sqlContext.sql("CREATE TABLE IF NOT EXISTS poeple2 (first_name STRING, last_name STRING,country STRING,age INT)")
+sqlContext.sql("LOAD DATA INPATH 's3://apache-spark-handson-approach/people_example.csv' INTO TABLE poeple2")
+
+
+
+
