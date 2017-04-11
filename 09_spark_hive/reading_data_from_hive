@@ -1,0 +1,4 @@
+from pyspark.sql import HiveContext
+sqlContext = HiveContext(sc)
+results = sqlContext.sql("FROM drivers SELECT *").collect()
+
