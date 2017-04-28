@@ -3,3 +3,8 @@ http://zhongyaonan.com/hadoop-tutorial/setting-up-hadoop-2-6-on-mac-osx-yosemite
 
 Hive Installation
 https://dtflaneur.wordpress.com/2015/10/04/installing-hive-on-osx-el-capitan/
+
+
+Below error url
+Caused by: java.lang.IllegalArgumentException: java.net.URISyntaxException: Relative path in absolute URI: ${system:java.io.tmpdir%7D/$%7Bhive.session.id%7D_resources
+http://stackoverflow.com/questions/27099898/java-net-urisyntaxexception-when-starting-hive
