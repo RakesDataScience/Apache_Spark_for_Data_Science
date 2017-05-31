@@ -77,29 +77,12 @@ rdd_x.cartesian(rdd_y).collect
 
 
 // groupByKey Transformation
-
-val rdd_a = sc.parallelize(List("black", "blue", "white", "green", "grey"), 2)
-//val rdd_b = rdd_a.keyBy(x => x.length)
-val rdd_b = rdd_a.keyBy(_.length)
-rdd_b.collect()
-rdd_b.groupByKey.collect
-
-//join Transformation
-
-val rdd_a = sc.parallelize(List("blue", "green", "orange"), 3)
-//val rdd_b = rdd_a.keyBy(x => x.length)
-val rdd_b = rdd_a.keyBy(_.length)
-rdd_b.collect()
-
-val rdd_c = sc.parallelize(List("black", "white", "grey"), 3)
-val rdd_d = rdd_c.keyBy(_.length)
-rdd_d.collect()
-
-val join_rdd = rdd_b.join(rdd_d)
-join_rdd.collect
-rdd_b.leftOuterJoin(rdd_d).collect()
-rdd_b.rightOuterJoin(rdd_d).collect()
-rdd_b.fullOuterJoin(rdd_d).collect()
+val rdd_a = sc.parallelize(List("animal", "human", "bird", "rat", "cat", "rabit", "sheep", "lion", "peacock"), 3)
+//val rdd_b = rdd_a.map(x =>x.length)
+val rdd_b = rdd_a.map(_.length)
+val rdd_c = rdd_b.zip(rdd_a)
+rdd_c.collect
+rdd_c.groupByKey.collect
 
 //reduceByKey Transformation
 
