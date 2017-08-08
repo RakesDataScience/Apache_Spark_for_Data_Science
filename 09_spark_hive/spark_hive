@@ -1,0 +1,64 @@
+
+Step 1 :
+Upload dataset to s3.(use aws cli to upload Ex:aws s3 cp /tmp/foo/people_example.csv s3://bucket/ )
+
+step2:
+Copy data from s3 to hadoop cluster
+a)Copy data from s3 to master node(Single machine)
+
+aws s3 cp s3://hadooproject/sample_07.csv /home/hadoop/data/
+aws s3 cp s3://hadooproject/sample_08.csv /home/hadoop/data/
+aws s3 cp s3://hadooproject/people_example.csv /home/hadoop/data/
+
+b)Copy data from master node to hdfs(multinode:Example emr 3 node cluster)
+
+hdfs dfs -ls /
+hdfs dfs -mkdir /input_data
+hdfs dfs -ls /input_data
+
+hdfs dfs -put /home/hadoop/data/sample_07.csv /input_data/
+hdfs dfs -ls /input_data
+
+hdfs dfs -put /home/hadoop/data/sample_08.csv /input_data
+hdfs dfs -ls /input_data
+
+hdfs dfs -put /home/hadoop/data/people_example.csv /input_data
+hdfs dfs -ls /input_data
+
+#Start apache spark
+spark-shell
+
+
+import spark.implicits._
+import spark.sql
+
+sql("CREATE TABLE IF NOT EXISTS poeple (first_name STRING, last_name STRING,country STRING,age INT)")
+sql("LOAD DATA INPATH '/input_data/people_example.csv' INTO TABLE poeple")
+val poeple = sql("SELECT * from poeple")
+poeple.show()
+
+#Go to hive and execute below commnad
+
+show tables;
+
+
+sql("CREATE TABLE sample_07 (code string,description string,total_emp int,salary int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TextFile")
+sql("LOAD DATA INPATH '/input_data/sample_07.csv' OVERWRITE INTO TABLE sample_07")
+val df_07 = sql("SELECT * from sample_07")
+
+df_07.show()
+
+df_07.filter(df_07("salary") > 150000).show()
+
+
+sql("CREATE TABLE sample_08 (code string,description string,total_emp int,salary int) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' STORED AS TextFile")
+sqlContext.sql("LOAD DATA INPATH '/input_data/sample_08.csv' OVERWRITE INTO TABLE sample_08")
+val df_08 = sql("SELECT * from sample_08")
+
+val df_09 = df_07.join(df_08, df_07("code") === df_08("code")).select(df_07.col("code"),df_07.col("description"))
+
+df_09.write.saveAsTable("sample_09")
+
+
+
+
